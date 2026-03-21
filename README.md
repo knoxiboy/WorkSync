@@ -1,36 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# WorkSyncAI ⚡️
+**AI-Powered Workspace Orchestration & Team Performance Intelligence**
 
-## Getting Started
+WorkSyncAI transforms meeting transcripts into actionable tasks and evaluates developer performance through automated AI-driven GitHub PR reviews. Built for agile teams that need precision, accountability, and zero-friction execution loops.
 
-First, run the development server:
+## 🚀 Key Features
 
+- **Live AI Transcription**: Real-time speech-to-text during meetings using standard Web Speech APIs.
+- **Smart Task Extraction**: Uses **Llama 3.3 (via GROQ)** to identify actionable tasks from meeting transcripts and assign them with deadlines and priorities.
+- **Manual Assignment**: Delegating tasks to specific team members is as simple as a click during any live session.
+- **Automated PR Evaluation**: AI-driven code reviews that evaluate PR correctness, quality, and completeness against assigned tasks.
+- **Manager Dashboard**: High-level visibility into team backlog, verified work, active sprints, and at-risk overdue tasks with automated escalation alerts.
+- **Employee Hub**: Focused task views with integrated PR submission workflows.
+
+## 🛠 Tech Stack
+
+- **Framework**: [Next.js 16 (App Router)](https://nextjs.org/)
+- **Authentication**: [Clerk](https://clerk.com/)
+- **Database**: [Prisma](https://www.prisma.io/) with PostgreSQL
+- **AI Engine**: [GROQ SDK](https://groq.com/) (Llama 3.3 models)
+- **Video Conferencing**: [LiveKit](https://livekit.io/)
+- **UI Components**: [Shadcn UI](https://ui.shadcn.com/) & [Tailwind CSS 4+](https://tailwindcss.com/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+
+## 📦 Getting Started
+
+### 1. Clone the repository
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/divysaxena24/WorkSync.git
+cd WorkSync
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Install dependencies
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Environment Setup
+Create a `.env.local` file in the root directory and add your keys:
+```env
+# Database
+DATABASE_URL="your-postgresql-url"
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Clerk Auth
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="your-clerk-pub-key"
+CLERK_SECRET_KEY="your-clerk-secret-key"
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL=/dashboard
+NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL=/dashboard
 
-## Learn More
+# AI & External APIs
+GROQ_API_KEY="your-groq-key"
+GITHUB_TOKEN="your-github-personal-access-token"
 
-To learn more about Next.js, take a look at the following resources:
+# LiveKit (Video)
+LIVEKIT_API_KEY="your-livekit-api-key"
+LIVEKIT_API_SECRET="your-livekit-secret"
+NEXT_PUBLIC_LIVEKIT_URL="your-livekit-ws-url"
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 4. Database Initialization
+```bash
+npx prisma generate
+npx prisma db push
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 5. Run Development Server
+```bash
+npm run dev
+```
+Navigate to `http://localhost:3000` to see the results.
 
-## Deploy on Vercel
+## 🧪 Development Workflow
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1.  **Sync**: Users log in and join/create a company.
+2.  **Meeting**: Start a meeting, record audio, and extract tasks using the AI engine.
+3.  **Execute**: Teams assign tasks manually or via AI.
+4.  **Evaluate**: Submit GitHub PR numbers to get instant feedback and score updates on the dashboard.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📄 License
+Precision built for high-performance teams. Under MIT License. © 2026 WorkSyncAI.

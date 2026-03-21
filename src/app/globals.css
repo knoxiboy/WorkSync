@@ -115,6 +115,13 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+
+  /* LiveKit Theme Overrides */
+  --lk-accent-color: #6366f1;
+  --lk-accent-fg: #ffffff;
+  --lk-bg: transparent;
+  --lk-border-color: rgba(255, 255, 255, 0.05);
+  --lk-control-bar-bg: transparent;
 }
 
 @layer base {
@@ -127,4 +134,62 @@
   html {
     @apply font-sans;
   }
+}
+
+/* Premium Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.1);
+  border-radius: 10px;
+  transition: all 0.3s;
+}
+
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.3);
+}
+
+/* LiveKit Component Adjustments */
+.lk-control-bar {
+  border: none !important;
+  background: transparent !important;
+}
+
+.lk-button {
+  border-radius: 12px !important;
+  transition: all 0.2s !important;
+}
+
+.lk-button:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.lk-chat-container {
+  background: transparent !important;
+  border: none !important;
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.lk-chat {
+  height: 100% !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+/* Shimmer Animation */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
 }
