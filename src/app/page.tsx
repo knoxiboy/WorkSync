@@ -1,10 +1,14 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Zap, ShieldCheck, LogIn, LayoutDashboard } from "lucide-react";
-import { Show, SignInButton, UserButton, SignUpButton } from "@clerk/nextjs";
+import { SignInButton, UserButton, SignUpButton } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import { LogoutButton } from "@/components/LogoutButton";
 
-export default function Home() {
+export default async function Home() {
+  const { userId } = await auth();
+  const isSignedIn = !!userId;
+
   return (
     <div className="flex flex-col min-h-screen bg-slate-950 text-slate-50 selection:bg-indigo-500/30">
       {/* Navbar */}
@@ -18,24 +22,27 @@ export default function Home() {
           </Link>
 
           <div className="flex items-center gap-4">
-            <Show when="signed-out">
-              <SignInButton mode="modal"><Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-white/5 transition-colors gap-2">
+            {!isSignedIn ? (
+              <SignInButton mode="modal">
+                <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-white/5 transition-colors gap-2">
                   <LogIn className="w-4 h-4" />
                   Log in
-                </Button></SignInButton>
-            </Show>
-            <Show when="signed-in">
-              <LogoutButton />
-              <div className="pl-2 border-l border-white/10">
-                <UserButton 
-                  appearance={{
-                    elements: {
-                      avatarBox: "w-9 h-9 border border-white/10"
-                    }
-                  }}
-                />
-              </div>
-            </Show>
+                </Button>
+              </SignInButton>
+            ) : (
+              <>
+                <LogoutButton />
+                <div className="pl-2 border-l border-white/10">
+                  <UserButton 
+                    appearance={{
+                      elements: {
+                        avatarBox: "w-9 h-9 border border-white/10"
+                      }
+                    }}
+                  />
+                </div>
+              </>
+            )}
           </div>
         </div>
       </nav>
@@ -65,24 +72,24 @@ export default function Home() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-300 pt-4">
-            <Show when="signed-out">
+            {!isSignedIn ? (
               <SignUpButton mode="modal" forceRedirectUrl="/dashboard">
                 <Button size="lg" className="h-12 px-8 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full font-semibold shadow-lg shadow-indigo-600/20 gap-2 text-base transition-all hover:scale-105 active:scale-95">
                   Get started <ArrowRight className="w-4 h-4" />
                 </Button>
               </SignUpButton>
-            </Show>
-            <Show when="signed-in">
+            ) : (
               <Link href="/dashboard">
                 <Button size="lg" className="h-12 px-8 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full font-semibold shadow-lg shadow-indigo-600/20 gap-2 text-base transition-all hover:scale-105 active:scale-95">
                   Go to Dashboard <LayoutDashboard className="w-4 h-4" />
                 </Button>
               </Link>
-            </Show>
+            )}
           </div>
         </div>
 
         {/* Feature Highlights */}
+        {/* ... (rest of the file unchanged) */}
         <div className="mt-24 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl w-full relative z-10 animate-in fade-in zoom-in-95 duration-1000 delay-500">
           <div className="p-8 rounded-2xl bg-slate-900/50 border border-slate-800 hover:border-indigo-500/50 transition-colors group">
             <Zap className="w-10 h-10 text-indigo-500 mb-4 group-hover:scale-110 transition-transform" />

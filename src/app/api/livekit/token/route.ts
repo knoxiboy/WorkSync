@@ -4,16 +4,16 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const { userId: clerkId } = await auth();
+    if (!clerkId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { room, username } = await req.json();
 
-    if (!room || !username) {
+    if (!room) {
       return NextResponse.json(
-        { error: 'Missing "room" or "username" query parameter' },
+        { error: 'Missing "room" query parameter' },
         { status: 400 }
       );
     }
@@ -30,8 +30,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Use a unique, safe identity (clerkId) and provide the display name
     const at = new AccessToken(apiKey, apiSecret, {
-      identity: username,
+      identity: clerkId,
+      name: username || "User", 
     });
 
     at.addGrant({ 
@@ -41,7 +43,10 @@ export async function POST(req: NextRequest) {
       canSubscribe: true,
     });
 
-    return NextResponse.json({ token: await at.toJwt() });
+    const token = await at.toJwt();
+    console.log(`[LIVEKIT] Generated token for user ${clerkId} in room ${room}`);
+
+    return NextResponse.json({ token });
   } catch (error) {
     console.error("LiveKit Token Error:", error);
     return NextResponse.json(

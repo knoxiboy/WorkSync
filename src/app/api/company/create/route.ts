@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/db";
+import { sql } from "@/lib/neon";
+import { randomBytes } from "crypto";
+
+const createId = () => randomBytes(12).toString('hex');
 
 export async function POST(req: Request) {
   try {
@@ -18,30 +21,33 @@ export async function POST(req: Request) {
       return new NextResponse("Missing name", { status: 400 });
     }
     
-    let dbUser = await prisma.user.findUnique({ where: { clerkId: userId } });
+    const dbUsers = await sql`SELECT * FROM "User" WHERE "clerkId" = ${userId} LIMIT 1`;
+    let dbUser = dbUsers[0] as any;
+
     if (!dbUser) {
-      dbUser = await prisma.user.create({
-        data: {
-          clerkId: userId,
-          name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || "User",
-          email: user.emailAddresses[0].emailAddress,
-        }
-      });
+      const uName = `${user.firstName || ""} ${user.lastName || ""}`.trim() || "User";
+      const uEmail = user.emailAddresses[0].emailAddress;
+      const newUsers = await sql`
+        INSERT INTO "User" (id, "clerkId", name, email, "createdAt")
+        VALUES (${createId()}, ${userId}, ${uName}, ${uEmail}, NOW())
+        RETURNING *
+      `;
+      dbUser = newUsers[0];
     }
 
-    const company = await prisma.company.create({
-      data: {
-        name,
-      }
-    });
+    const inviteCode = randomBytes(4).toString('hex').toUpperCase();
+    const newCompanies = await sql`
+      INSERT INTO "Company" (id, name, "inviteCode", "createdAt")
+      VALUES (${createId()}, ${name}, ${inviteCode}, NOW())
+      RETURNING *
+    `;
+    const company = newCompanies[0] as any;
 
-    await prisma.user.update({
-      where: { id: dbUser.id },
-      data: {
-        companyId: company.id,
-        role: "MANAGER"
-      }
-    });
+    await sql`
+      UPDATE "User"
+      SET "companyId" = ${company.id}, role = 'MANAGER'
+      WHERE id = ${dbUser.id}
+    `;
 
     return NextResponse.json(company);
   } catch (error) {

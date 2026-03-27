@@ -5,18 +5,19 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { PRSubmissionDialog } from "@/components/PRSubmissionDialog";
 import { Sparkles, ArrowRight, Zap, ShieldCheck } from "lucide-react";
 
 export function ManagerDashboard({ 
   company, 
   tasks, 
   alerts,
+  escalations,
   performance 
 }: { 
   company: any, 
   tasks: any[], 
   alerts: any[],
+  escalations: any[],
   performance: any[]
 }) {
   const total = tasks.length;
@@ -36,6 +37,11 @@ export function ManagerDashboard({
         </div>
         <div className="flex items-center gap-3">
           <p className="text-sm text-slate-400 font-mono hidden md:block">Invite: {company.inviteCode}</p>
+          <Link href="/analytics">
+            <Button variant="outline" size="lg" className="border-indigo-200 text-indigo-700 hover:bg-indigo-50 rounded-full px-6">
+              Analytics Hub
+            </Button>
+          </Link>
           <Link href="/meeting">
             <Button size="lg" className="bg-indigo-600 hover:bg-indigo-500 shadow-lg shadow-indigo-600/20 rounded-full px-6">
               Start AI Meeting
@@ -91,18 +97,32 @@ export function ManagerDashboard({
         </Card>
 
         {/* Escalation System (Phase 9) */}
-        <Card className="border-none shadow-sm bg-slate-900 text-white leading-relaxed">
-          <CardHeader><CardTitle className="text-white flex items-center gap-2 text-lg font-bold truncate">System Alerts <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" /></CardTitle></CardHeader>
+        <Card className="border-none shadow-sm bg-slate-900 text-white leading-relaxed overflow-hidden">
+          <CardHeader><CardTitle className="text-white flex items-center gap-2 text-lg font-bold truncate">Executive Escalations <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.5)]" /></CardTitle></CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {alerts.length === 0 ? (
-                <p className="text-slate-500 text-sm">All systems nominal. No escalations.</p>
+            <div className="space-y-4">
+              {escalations.length === 0 ? (
+                <p className="text-slate-500 text-sm italic">All systems nominal. No escalations.</p>
               ) : (
-                alerts.slice(0, 5).map(alert => (
-                  <div key={alert.id} className="p-3 rounded-lg bg-slate-800 border border-slate-700 text-xs shadow-inner">
-                    <p className="text-slate-300 mb-1">{alert.message}</p>
-                    <p className="text-slate-500 uppercase font-black text-[9px] tracking-widest">{new Date(alert.sentAt).toLocaleString('en-US')}</p>
-                  </div>
+                escalations.slice(0, 5).map(esc => (
+                  <Link href={`/tasks/${esc.taskId}`} key={esc.id} className="block group/esc">
+                    <div className={`p-4 rounded-2xl border transition-all ${
+                      esc.severity === 'critical' ? 'bg-red-500/10 border-red-500/20 hover:bg-red-500/20' : 
+                      esc.severity === 'high' ? 'bg-orange-500/10 border-orange-500/20 hover:bg-orange-500/20' : 
+                      'bg-slate-800 border-slate-700 hover:bg-slate-700'
+                    }`}>
+                      <div className="flex justify-between items-start mb-2">
+                         <Badge variant="outline" className={`text-[10px] font-black uppercase tracking-widest ${
+                           esc.severity === 'critical' || esc.severity === 'high' ? 'bg-red-500 text-white border-none' : 'text-slate-400 border-slate-700'
+                         }`}>
+                           {esc.severity || 'low'}
+                         </Badge>
+                         <span className="text-[10px] text-slate-500 font-mono capitalize">{esc.reason.replace('_', ' ')}</span>
+                      </div>
+                      <p className="text-sm font-bold text-slate-100 group-hover/esc:text-indigo-300 transition-colors truncate">{esc.taskTitle}</p>
+                      <p className="text-[10px] text-slate-500 mt-2 font-medium uppercase tracking-tighter">{new Date(esc.createdAt).toLocaleString()}</p>
+                    </div>
+                  </Link>
                 ))
               )}
             </div>
@@ -138,7 +158,9 @@ export function ManagerDashboard({
                 {tasks.map(task => (
                   <TableRow key={task.id} className="group transition-colors hover:bg-slate-50/50">
                     <TableCell className="py-4">
-                      <div className="font-semibold text-slate-700">{task.title}</div>
+                      <Link href={`/tasks/${task.id}`} className="hover:underline decoration-indigo-300 decoration-2 underline-offset-4">
+                        <div className="font-semibold text-slate-700">{task.title}</div>
+                      </Link>
                       <div className="text-[10px] text-slate-400 mt-0.5">
                         Deadline: {task.deadline ? (
                           isNaN(new Date(task.deadline).getTime()) 
@@ -166,11 +188,11 @@ export function ManagerDashboard({
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      {task.status !== "completed" ? (
-                        <PRSubmissionDialog taskId={task.id} taskTitle={task.title} ownerClerkId={task.user?.clerkId} />
-                      ) : (
-                        <div className="text-green-600 font-bold text-xs uppercase tracking-tighter">Verified ✓</div>
-                      )}
+                      <Link href={`/tasks/${task.id}`}>
+                        <Button variant="ghost" size="sm" className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 font-bold uppercase tracking-widest text-[10px]">
+                          Audit Details
+                        </Button>
+                      </Link>
                     </TableCell>
                   </TableRow>
                 ))}

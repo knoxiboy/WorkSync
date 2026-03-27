@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/db";
+import { sql } from "@/lib/neon";
 import Groq from "groq-sdk";
+import { randomBytes } from "crypto";
+
+const createId = () => randomBytes(12).toString('hex');
 
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
@@ -14,10 +17,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const dbUser = await prisma.user.findUnique({
-      where: { clerkId: userId },
-      include: { company: true },
-    });
+    const dbUsers = await sql`
+      SELECT u.*, row_to_json(c.*) as company
+      FROM "User" u
+      LEFT JOIN "Company" c ON u."companyId" = c.id
+      WHERE u."clerkId" = ${userId}
+      LIMIT 1
+    `;
+    const dbUser = dbUsers[0] as any;
 
     if (!dbUser || !dbUser.companyId) {
       return NextResponse.json({ error: "User or company not found" }, { status: 404 });
@@ -29,18 +36,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Transcript is required" }, { status: 400 });
     }
 
-    // 1. Upsert Meeting record using roomId if provided, otherwise create new
-    const meeting = await prisma.meeting.upsert({
-      where: { id: roomId || "new-meeting" }, // Fallback for safety, though roomId should be there
-      update: { transcript },
-      create: {
-        id: roomId,
-        transcript,
-        companyId: dbUser.companyId,
-      },
-    });
+    const mId = roomId || createId();
+    const meetings = await sql`
+      INSERT INTO "Meeting" (id, transcript, "companyId", "createdAt")
+      VALUES (${mId}, ${transcript}, ${dbUser.companyId}, NOW())
+      ON CONFLICT (id) DO UPDATE SET transcript = EXCLUDED.transcript
+      RETURNING *
+    `;
+    const meeting = meetings[0] as any;
 
-    // 2. Call GROQ to extract tasks
     const response = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
       messages: [
@@ -74,8 +78,6 @@ export async function POST(req: Request) {
 
     let extractedData;
     try {
-      // The prompt asks for an array, but response_format: 'json_object' might wrap it or GPT might produce a root object.
-      // We'll handle both cases.
       const parsed = JSON.parse(content);
       extractedData = Array.isArray(parsed) ? parsed : (parsed.tasks || Object.values(parsed)[0]);
       
@@ -87,33 +89,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Failed to parse AI response", raw: content }, { status: 500 });
     }
 
-    // 3. Fetch all users in the company for fuzzy matching
-    const companyUsers = await prisma.user.findMany({
-      where: { companyId: dbUser.companyId },
-    });
+    const companyUsers = await sql`SELECT * FROM "User" WHERE "companyId" = ${dbUser.companyId}`;
 
-    // 4. Process and create tasks
     const createdTasks = [];
     for (const item of extractedData) {
-      const { task, owner, deadline, priority } = item;
+      const { task: title, owner, deadline, priority } = item;
       
-      // Fuzzy match owner
       const matchedUser = companyUsers.find((u: any) => 
         u.name.toLowerCase().includes(owner.toLowerCase())
-      );
+      ) as any;
 
-      const newTask = await prisma.task.create({
-        data: {
-          title: task,
-          owner: owner,
-          ownerId: matchedUser ? matchedUser.id : null,
-          deadline: deadline,
-          priority: priority || "medium",
-          status: "todo",
-          meetingId: meeting.id,
-        },
-      });
-      createdTasks.push(newTask);
+      const newTaskResults = await sql`
+        INSERT INTO "Task" (id, title, owner, "ownerId", deadline, priority, status, "meetingId", "createdAt")
+        VALUES (${createId()}, ${title}, ${owner}, ${matchedUser ? matchedUser.id : null}, ${deadline}, ${priority || "medium"}, 'todo', ${meeting.id}, NOW())
+        RETURNING *
+      `;
+      createdTasks.push(newTaskResults[0]);
     }
 
     return NextResponse.json({ meetingId: meeting.id, tasks: createdTasks });

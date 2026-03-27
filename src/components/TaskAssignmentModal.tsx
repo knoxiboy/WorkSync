@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { UserPlus, Calendar, AlertCircle, CheckCircle2, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
+import { useRemoteParticipants, useLocalParticipant } from "@livekit/components-react";
 
 interface User {
   id: string;
   name: string;
+  clerkId: string;
 }
 
 interface TaskAssignmentModalProps {
@@ -29,6 +31,9 @@ export function TaskAssignmentModal({ isOpen, onClose, meetingId }: TaskAssignme
     deadline: "",
     priority: "medium",
   });
+
+  const { localParticipant } = useLocalParticipant();
+  const remoteParticipants = useRemoteParticipants();
 
   useEffect(() => {
     if (isOpen) {
@@ -50,6 +55,14 @@ export function TaskAssignmentModal({ isOpen, onClose, meetingId }: TaskAssignme
       setFetchingUsers(false);
     }
   };
+
+  // Filter users to only those currently in the meeting
+  const activeIdentities = [
+    localParticipant?.identity,
+    ...remoteParticipants.map(p => p.identity)
+  ].filter(Boolean);
+
+  const activeUsers = users.filter(u => activeIdentities.includes(u.clerkId));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,7 +117,7 @@ export function TaskAssignmentModal({ isOpen, onClose, meetingId }: TaskAssignme
                 disabled={fetchingUsers}
               >
                 <option value="" disabled className="bg-slate-900">Select Employee...</option>
-                {users.map((u) => (
+                {activeUsers.map((u) => (
                   <option key={u.id} value={u.id} className="bg-slate-900">
                     {u.name}
                   </option>

@@ -1,29 +1,30 @@
 "use client";
 
+import Link from "next/link";
+
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { PRSubmissionDialog } from "@/components/PRSubmissionDialog";
 
 export function EmployeeDashboard({ user, tasks }: { user: any, tasks: any[] }) {
-  const todo = tasks.filter(t => t.status === "todo");
-  const inProgress = tasks.filter(t => t.status === "in_progress");
-  const done = tasks.filter(t => t.status === "completed");
+  const todo = tasks.filter(t => t.status === "todo" || t.status === "pending");
+  const inProgress = tasks.filter(t => t.status === "in_progress" || t.status === "needs_improvement" || t.status === "submitted");
+  const done = tasks.filter(t => t.status === "completed" || t.status === "approved");
 
   const TaskCard = ({ task }: { task: any }) => (
     <Card className="mb-3 hover:shadow-md transition-shadow">
       <CardContent className="p-4 space-y-2">
-        <div className="font-medium">{task.title}</div>
+        <Link href={`/tasks/${task.id}`} className="hover:underline decoration-indigo-300 decoration-2 underline-offset-4 block">
+          <div className="font-medium">{task.title}</div>
+        </Link>
         <div className="flex items-center gap-2 text-xs">
           <Badge variant="outline">{task.priority}</Badge>
           {task.deadline && (
             <span className="text-slate-500">Due: {new Date(task.deadline).toLocaleDateString('en-US')}</span>
           )}
         </div>
-        {task.status !== "completed" && (
-          <div className="pt-2">
-            <PRSubmissionDialog taskId={task.id} taskTitle={task.title} ownerClerkId={task.user?.clerkId} />
-          </div>
-        )}
+        <div className="pt-1 text-[10px] text-slate-400 font-medium italic">
+          Click title to submit execution link
+        </div>
       </CardContent>
     </Card>
   );

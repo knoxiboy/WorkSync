@@ -7,7 +7,7 @@ import { useState, useEffect, useRef, useCallback, memo } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { LiveKitRoom, VideoConference, useLocalParticipant, useRemoteParticipants, useRoomContext, GridLayout, ParticipantTile, useTracks, ControlBar, Chat } from '@livekit/components-react';
+import { LiveKitRoom, useLocalParticipant, useRemoteParticipants, useRoomContext, GridLayout, ParticipantTile, useTracks, ControlBar, Chat } from '@livekit/components-react';
 import { DataPacket_Kind, Room, Participant, Track } from "livekit-client";
 import '@livekit/components-styles';
 
@@ -112,11 +112,137 @@ const MeetingContent = memo(({
   onOpenAssignTask
 }: any) => {
   const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [pinnedTrackSid, setPinnedTrackSid] = useState<string | null>(null);
   const room = useRoomContext();
   const { localParticipant } = useLocalParticipant();
   const remoteParticipants = useRemoteParticipants();
   const tracks = useTracks([{ source: Track.Source.Camera, withPlaceholder: true }]);
   const router = useRouter();
+
+  // Dynamic Layout Logic
+  const renderParticipants = () => {
+    // Robust track filtering to include placeholders for participants without video
+    const allTracks = tracks.filter(t => t.participant);
+    
+    if (allTracks.length === 0) return null;
+
+    if (allTracks.length === 1) {
+      // Single person: Full View
+      const track = allTracks[0];
+      return (
+        <div className="w-full h-full p-2 md:p-4 animate-in fade-in zoom-in-95 duration-500">
+           <div className="relative w-full h-full rounded-3xl border border-white/5 overflow-hidden shadow-2xl bg-slate-900">
+             <ParticipantTile 
+               trackRef={track} 
+               className="w-full h-full" 
+             />
+             {(!track.publication || track.publication.isMuted) && (
+               <div className="absolute inset-0 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm z-10 pointer-events-none">
+                 <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-white/10 flex items-center justify-center backdrop-blur-3xl shadow-[0_0_50px_rgba(79,70,229,0.2)]">
+                   <span className="text-4xl md:text-5xl font-black text-indigo-400">
+                     {(track.participant.name || track.participant.identity).slice(0, 2).toUpperCase()}
+                   </span>
+                 </div>
+               </div>
+             )}
+             <div className="absolute bottom-6 left-6 px-3 py-1.5 rounded-xl bg-slate-950/60 backdrop-blur-md border border-white/10 text-xs font-bold text-white uppercase tracking-widest z-20">
+               {track.participant.name || track.participant.identity}
+             </div>
+           </div>
+        </div>
+      );
+    }
+
+    if (allTracks.length === 2) {
+      // Dual person: PiP Mode
+      const remoteTrack = allTracks.find(t => !t.participant.isLocal);
+      const currentPinnedSid = pinnedTrackSid || remoteTrack?.publication?.trackSid || allTracks[0].publication?.trackSid || allTracks[0].participant.sid;
+      
+      const mainTrack = allTracks.find(t => (t.publication?.trackSid === currentPinnedSid) || (t.participant.sid === currentPinnedSid)) || allTracks[0];
+      const secondaryTrack = allTracks.find(t => t !== mainTrack) || (allTracks[1] || allTracks[0]);
+
+      return (
+        <div className="relative w-full h-full p-2 md:p-4 animate-in fade-in duration-500">
+          {/* Main View */}
+          <div className="w-full h-full transition-all duration-500 ease-in-out relative rounded-3xl border border-white/10 overflow-hidden shadow-2xl bg-slate-900">
+            <ParticipantTile 
+              trackRef={mainTrack} 
+              className="w-full h-full" 
+            />
+            {(!mainTrack.publication || mainTrack.publication.isMuted) && (
+              <div className="absolute inset-0 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm z-10 pointer-events-none">
+                <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-white/10 flex items-center justify-center backdrop-blur-3xl shadow-2xl">
+                   <span className="text-4xl md:text-5xl font-black text-indigo-400">
+                     {(mainTrack.participant.name || mainTrack.participant.identity).slice(0, 2).toUpperCase()}
+                   </span>
+                </div>
+              </div>
+            )}
+            <div className="absolute bottom-6 left-6 px-3 py-1.5 rounded-xl bg-slate-950/60 backdrop-blur-md border border-white/10 text-xs font-bold text-white uppercase tracking-widest z-20">
+              {mainTrack.participant.name || mainTrack.participant.identity}
+            </div>
+          </div>
+          
+          {/* PiP View (Floating) */}
+          <div 
+            onClick={() => setPinnedTrackSid(secondaryTrack?.publication?.trackSid || secondaryTrack.participant.sid)}
+            className="absolute bottom-10 right-10 w-32 h-20 md:w-64 md:h-40 z-30 group cursor-pointer transition-all duration-500 hover:scale-105 active:scale-95"
+          >
+            <div className="w-full h-full rounded-2xl border border-white/20 overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] bg-slate-800 ring-2 ring-indigo-500/30 group-hover:ring-indigo-500/60 transition-all relative">
+               <ParticipantTile 
+                 trackRef={secondaryTrack} 
+                 className="w-full h-full object-cover" 
+               />
+               {(!secondaryTrack.publication || secondaryTrack.publication.isMuted) && (
+                 <div className="absolute inset-0 flex items-center justify-center bg-slate-900 z-10 pointer-events-none">
+                   <div className="w-10 h-10 md:w-16 md:h-16 rounded-full bg-indigo-500/20 flex items-center justify-center backdrop-blur-xl">
+                     <span className="text-xs md:text-xl font-black text-indigo-400">
+                       {(secondaryTrack.participant.name || secondaryTrack.participant.identity).slice(0, 2).toUpperCase()}
+                     </span>
+                   </div>
+                 </div>
+               )}
+               <div className="absolute inset-0 bg-slate-950/20 group-hover:bg-transparent transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 z-20">
+                  <span className="bg-slate-950/60 backdrop-blur-md px-3 py-1.5 rounded-lg text-[8px] md:text-[10px] uppercase font-bold tracking-[0.2em] border border-white/10 text-white shadow-xl">Swap View</span>
+               </div>
+               <div className="absolute bottom-2 left-2 px-1.5 py-0.5 rounded-md bg-slate-950/60 backdrop-blur-md border border-white/10 text-[8px] md:text-[9px] font-bold text-white uppercase tracking-wider z-20">
+                 {secondaryTrack.participant.name || secondaryTrack.participant.identity}
+               </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Grid mode for 3+ people
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 h-full overflow-y-auto custom-scrollbar p-2 md:p-4 animate-in fade-in duration-500">
+        {allTracks.map((track) => (
+          <div key={`${track.participant.identity}-${track.source}-${track.publication?.trackSid || 'placeholder'}`} className="relative group">
+            <ParticipantTile 
+              trackRef={track}
+              className="rounded-2xl border border-white/5 overflow-hidden shadow-2xl transition-all duration-500 hover:border-indigo-500/30 aspect-video md:aspect-auto bg-slate-900 h-full w-full" 
+            />
+            {(!track.publication || track.publication.isMuted) && (
+              <div className="absolute inset-0 flex items-center justify-center bg-slate-900 z-10 pointer-events-none">
+                <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-white/10 flex items-center justify-center backdrop-blur-3xl shadow-2xl animate-in zoom-in-50 duration-700">
+                  <span className="text-2xl md:text-3xl font-black text-indigo-400">
+                    {(track.participant.name || track.participant.identity).slice(0, 2).toUpperCase()}
+                  </span>
+                  <div className="absolute -bottom-1 -right-1 w-5 h-5 md:w-6 md:h-6 bg-slate-900 rounded-full border border-white/10 flex items-center justify-center">
+                    <div className="w-2 h-2 md:w-2.5 md:h-2.5 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.5)]" />
+                  </div>
+                </div>
+              </div>
+            )}
+            <div className="absolute bottom-3 left-3 px-2 py-1 rounded-md bg-slate-950/60 backdrop-blur-md border border-white/10 text-[10px] font-bold text-white uppercase tracking-widest z-20">
+              {track.participant.name || track.participant.identity}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   useEffect(() => {
     if (!room || !localParticipant) return;
@@ -130,7 +256,7 @@ const MeetingContent = memo(({
         const data = JSON.parse(text);
         if (data.type === "transcript-segment") {
           console.log("Incoming remote transcript:", data.text);
-          onTranscriptUpdate(`[${participant?.identity || 'Peer'}]: ${data.text}\n`);
+          onTranscriptUpdate(`[${participant?.name || participant?.identity || 'Peer'}]: ${data.text}\n`);
         }
       } catch (e) {
         console.error("Failed to parse incoming data", e);
@@ -231,10 +357,8 @@ const MeetingContent = memo(({
       </header>
 
       <div className="flex-1 flex flex-col overflow-hidden bg-[#020617] relative">
-        <div className="flex-1 overflow-hidden p-3 md:p-6">
-          <GridLayout tracks={tracks} style={{ height: '100%' }}>
-             <ParticipantTile className="rounded-2xl border border-white/5 overflow-hidden shadow-2xl transition-all duration-500 hover:border-indigo-500/30" />
-          </GridLayout>
+        <div className="flex-1 overflow-hidden">
+          {renderParticipants()}
         </div>
         
         {/* Floating Control Bar */}
@@ -365,6 +489,7 @@ export default function SharedMeetingPage() {
           if (data.token) {
             setToken(data.token);
           } else {
+            console.error("Token error:", data);
             toast.error("Failed to generate meeting token");
           }
         } catch (e) {
@@ -514,8 +639,8 @@ export default function SharedMeetingPage() {
       <div className="flex-1 flex overflow-hidden">
         <LiveKitRoom
           key={token}
-          video={true}
-          audio={true}
+          video={false}
+          audio={false}
           token={token}
           serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_URL}
           data-lk-theme="default"
@@ -533,6 +658,11 @@ export default function SharedMeetingPage() {
                onOpenSidebar={openSidebar}
                onOpenAssignTask={() => setIsAssignModalOpen(true)}
               />
+              <TaskAssignmentModal 
+                isOpen={isAssignModalOpen}
+                onClose={() => setIsAssignModalOpen(false)}
+                meetingId={roomId}
+              />
           </div>
           <TranscriptionFeed 
             transcript={transcript}
@@ -544,12 +674,6 @@ export default function SharedMeetingPage() {
           />
         </LiveKitRoom>
       </div>
-      
-      <TaskAssignmentModal 
-        isOpen={isAssignModalOpen}
-        onClose={() => setIsAssignModalOpen(false)}
-        meetingId={roomId}
-      />
     </div>
   );
 }

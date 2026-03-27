@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/db";
+import { sql } from "@/lib/neon";
+import { randomBytes } from "crypto";
+
+// Simple cuid-like generator for IDs
+const createId = () => randomBytes(12).toString('hex');
 
 export async function POST() {
   try {
@@ -11,15 +15,18 @@ export async function POST() {
       return new NextResponse("Unauthorized", { status: 401 });
     }
     
-    let dbUser = await prisma.user.findUnique({ where: { clerkId: userId } });
+    const dbUsers = await sql`SELECT * FROM "User" WHERE "clerkId" = ${userId} LIMIT 1`;
+    let dbUser = dbUsers[0];
+
     if (!dbUser) {
-      dbUser = await prisma.user.create({
-        data: {
-          clerkId: userId,
-          name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || "User",
-          email: user.emailAddresses[0].emailAddress,
-        }
-      });
+      const name = `${user.firstName || ""} ${user.lastName || ""}`.trim() || "User";
+      const email = user.emailAddresses[0].emailAddress;
+      const newUsers = await sql`
+        INSERT INTO "User" ("id", "clerkId", "name", "email", "createdAt")
+        VALUES (${createId()}, ${userId}, ${name}, ${email}, NOW())
+        RETURNING *
+      `;
+      dbUser = newUsers[0];
     }
 
     return NextResponse.json(dbUser);
