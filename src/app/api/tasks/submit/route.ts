@@ -63,9 +63,9 @@ export async function POST(req: Request) {
     const work = await fetchGitHubWork(githubMetadata);
     
     if (work) {
-      // Temporarily mark as 'evaluating' in logs (UI can handle based on status 'submitted')
-      console.log(`[SUBMIT_API] Sending to AI for evaluation...`);
-      const evaluation = await evaluateSubmission(task.title, task.description || "", work);
+      // Send to multi-agent AI for evaluation
+      console.log(`[SUBMIT_API] Sending to multi-agent AI for evaluation...`);
+      const evaluation = await evaluateSubmission(task.title, task.description || "", work, taskId);
       
       if (evaluation) {
         console.log(`[SUBMIT_API] AI Evaluation 0-100: ${evaluation.score} | Result: ${evaluation.status}`);
