@@ -85,6 +85,7 @@ export interface ExtractedTask {
   owner: string;
   deadline: string | null;
   priority: "high" | "medium" | "low";
+  dependsOnTaskTitle: string | null;
 }
 
 async function runTaskOrchestrator(
@@ -108,9 +109,10 @@ Guidelines:
 - owner: Match to one of these team members: ${teamMembers.join(", ")}. Use first name only.
 - deadline: YYYY-MM-DD format. TODAY IS: ${today}. If "by tomorrow" → calculate tomorrow. If unclear → null.
 - priority: "high" | "medium" | "low" based on urgency signals in the context.
+- dependsOnTaskTitle: If this task is blocked by or depends on another task being extracted, provide the EXACT title of that blocking task. Otherwise, null.
 - Each task should be specific and actionable, not vague.
 
-Return ONLY valid JSON: { "tasks": [{ "task": "...", "owner": "...", "deadline": "...", "priority": "..." }] }`,
+Return ONLY valid JSON: { "tasks": [{ "task": "...", "owner": "...", "deadline": "...", "priority": "...", "dependsOnTaskTitle": null }] }`,
       },
       {
         role: "user",
@@ -181,11 +183,12 @@ Your checks:
 2. Are there duplicate or overlapping tasks? Merge them.
 3. Are deadlines realistic? Flag impossible ones.
 4. Is the owner assignment reasonable? Flag mismatches.
-5. Add a confidence score (0.0–1.0) for each task.
+5. If dependsOnTaskTitle is set, does that blocking task actually exist in the extracted list? If not, set it to null.
+6. Add a confidence score (0.0–1.0) for each task.
 
 Return ONLY valid JSON:
 {
-  "tasks": [{ "task": "...", "owner": "...", "deadline": "...", "priority": "...", "confidence": 0.95, "validationNote": "Confirmed in transcript" }],
+  "tasks": [{ "task": "...", "owner": "...", "deadline": "...", "priority": "...", "dependsOnTaskTitle": null, "confidence": 0.95, "validationNote": "Confirmed in transcript" }],
   "overallConfidence": 0.85,
   "removedCount": 1,
   "warnings": ["Task X was hallucinated and removed"]

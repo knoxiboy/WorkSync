@@ -38,11 +38,12 @@ export default async function TaskDetailPage({ params }: { params: { taskId: str
   const curUsers = await sql`SELECT id, role FROM "User" WHERE "clerkId" = ${clerkId} LIMIT 1`;
   const currentUser = curUsers[0] as any;
 
-  // 1. Fetch Task, User, and Submissions
+  // 1. Fetch Task, User, Submissions, and Blocker
   const tasks = await sql`
     SELECT t.*, 
            (SELECT row_to_json(u.*) FROM "User" u WHERE u.id = t."ownerId") as user,
-           (SELECT row_to_json(m.*) FROM "Meeting" m WHERE m.id = t."meetingId") as meeting
+           (SELECT row_to_json(m.*) FROM "Meeting" m WHERE m.id = t."meetingId") as meeting,
+           (SELECT row_to_json(b.*) FROM "Task" b WHERE b.id = t."blockedById") as blocker
     FROM "Task" t
     WHERE t.id = ${taskId}
     LIMIT 1
@@ -110,6 +111,11 @@ export default async function TaskDetailPage({ params }: { params: { taskId: str
               </h1>
             </div>
             <div className="flex items-center gap-4">
+               {task.blocker && (
+                 <Badge variant="outline" className="border-red-500/50 text-red-500 bg-red-500/10 px-4 py-2 font-bold tracking-wider uppercase text-xs">
+                   Blocked By: {task.blocker.title}
+                 </Badge>
+               )}
                <TaskStatusControl taskId={task.id} currentStatus={task.status} />
                <Badge className={`${getStatusColor(task.status)} border-none px-6 py-2.5 text-xs font-black tracking-[0.2em] shadow-lg shadow-indigo-500/20`}>
                  {task.status.replace('_', ' ').toUpperCase()}

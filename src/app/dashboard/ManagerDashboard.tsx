@@ -182,6 +182,11 @@ export function ManagerDashboard({
                           <span className="text-slate-300">N/A</span>
                         )}
                       </div>
+                      {task.blocker && (
+                        <div className="text-[10px] text-red-500 font-bold mt-1 bg-red-50 w-fit px-2 py-0.5 rounded border border-red-100 uppercase tracking-widest">
+                          BLOCKED BY: {task.blocker.title}
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">

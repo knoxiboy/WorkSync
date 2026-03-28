@@ -50,6 +50,11 @@ model Task {
   meeting    Meeting?  @relation(fields: [meetingId], references: [id])
   evaluation Evaluation?
   createdAt  DateTime  @default(now())
+
+  // Dependencies / Blockers
+  blockedById String?
+  blockedBy   Task?    @relation("TaskBlocks", fields: [blockedById], references: [id])
+  blocking    Task[]   @relation("TaskBlocks")
 }
 
 model Evaluation {

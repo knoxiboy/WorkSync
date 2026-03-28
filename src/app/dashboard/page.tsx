@@ -35,7 +35,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
   const allTasks = await sql`
     SELECT t.*, 
            (SELECT row_to_json(u.*) FROM "User" u WHERE u.id = t."ownerId") as user,
-           (SELECT row_to_json(e.*) FROM "Evaluation" e WHERE e."taskId" = t.id) as evaluation
+           (SELECT row_to_json(e.*) FROM "Evaluation" e WHERE e."taskId" = t.id) as evaluation,
+           (SELECT row_to_json(b.*) FROM "Task" b WHERE b.id = t."blockedById") as blocker
     FROM "Task" t
     WHERE t."ownerId" IN (SELECT id FROM "User" WHERE "companyId" = ${dbUser.companyId})
        OR t."meetingId" IN (SELECT id FROM "Meeting" WHERE "companyId" = ${dbUser.companyId})

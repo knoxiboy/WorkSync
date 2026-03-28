@@ -64,18 +64,34 @@ export async function POST(req: Request) {
     // Create tasks with pending_review status
     const createdTasks = [];
     for (const item of pipelineResult.tasks) {
-      const { task: title, owner, deadline, priority } = item;
+      const { task: title, owner, deadline, priority, dependsOnTaskTitle } = item;
       
       const matchedUser = companyUsers.find((u: any) => 
         u.name.toLowerCase().includes(owner.toLowerCase())
       ) as any;
 
+      // We store the original extracted item object on the DB record temporarily to use in the second pass
       const newTaskResults = await sql`
         INSERT INTO "Task" (id, title, owner, "ownerId", deadline, priority, status, "meetingId", "createdAt")
         VALUES (${createId()}, ${title}, ${owner}, ${matchedUser ? matchedUser.id : null}, ${deadline}, ${priority || "medium"}, 'pending_review', ${meeting.id}, NOW())
         RETURNING *
       `;
-      createdTasks.push(newTaskResults[0]);
+      const newTask = newTaskResults[0];
+      (newTask as any).dependsOnTaskTitle = dependsOnTaskTitle;
+      createdTasks.push(newTask);
+    }
+
+    // Second pass: link dependencies
+    for (const t of createdTasks) {
+      if ((t as any).dependsOnTaskTitle) {
+        const blockerTask = createdTasks.find(bt => bt.title.toLowerCase() === (t as any).dependsOnTaskTitle.toLowerCase());
+        if (blockerTask) {
+          await sql`
+            UPDATE "Task" SET "blockedById" = ${blockerTask.id} WHERE id = ${t.id}
+          `;
+          t.blockedById = blockerTask.id;
+        }
+      }
     }
 
     return NextResponse.json({ 
