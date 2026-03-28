@@ -1,4 +1,4 @@
-import { sql } from "@/lib/neon";
+import { sql } from "@/lib/core/neon";
 import { NextResponse } from "next/server";
 
 export async function GET() {

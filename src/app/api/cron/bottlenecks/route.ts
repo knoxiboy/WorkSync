@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { sql } from "@/lib/neon";
+import { sql } from "@/lib/core/neon";
 import { createId } from "@paralleldrive/cuid2";
 import { runVelocityAnalyzer } from "@/lib/ai/velocityAgent";
-import { sendRiskAlertEmail } from "@/lib/notifications";
+import { sendRiskAlertEmail } from "@/lib/integrations/notifications";
 
 // Example format: GET /api/cron/bottlenecks
 export async function GET() {

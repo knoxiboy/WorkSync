@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { sql } from "@/lib/neon";
-import { parseGitHubUrl } from "@/lib/github-parser";
-import { fetchGitHubWork } from "@/lib/github";
+import { sql } from "@/lib/core/neon";
+import { parseGitHubUrl } from "@/lib/integrations/github-parser";
+import { fetchGitHubWork } from "@/lib/integrations/github";
 import { evaluateSubmission } from "@/lib/ai/evaluateSubmission";
 
 export async function DELETE(

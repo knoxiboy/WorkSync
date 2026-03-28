@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { sql } from "@/lib/neon";
-import { sendTaskAssignmentEmail } from "@/lib/notifications";
+import { sql } from "@/lib/core/neon";
+import { sendTaskAssignmentEmail } from "@/lib/integrations/notifications";
 
 export async function POST(req: Request) {
   try {

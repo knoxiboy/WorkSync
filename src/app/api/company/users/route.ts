@@ -1,7 +1,7 @@
 // NEW: src/app/api/company/users/route.ts
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { sql } from "@/lib/neon";
+import { sql } from "@/lib/core/neon";
 
 export async function GET() {
   try {

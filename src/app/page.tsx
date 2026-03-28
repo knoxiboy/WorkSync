@@ -23,10 +23,14 @@ export default async function Home() {
 
           <div className="flex items-center gap-4">
             {!isSignedIn ? (
-              <SignInButton mode="modal"><Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-white/5 transition-colors gap-2">
-                  <LogIn className="w-4 h-4" />
-                  Log in
-                </Button></SignInButton>
+              <SignInButton mode="modal">
+                <div>
+                  <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-white/5 transition-colors gap-2">
+                    <LogIn className="w-4 h-4" />
+                    Log in
+                  </Button>
+                </div>
+              </SignInButton>
             ) : (
               <>
                 <LogoutButton />
@@ -71,9 +75,13 @@ export default async function Home() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-300 pt-4">
             {!isSignedIn ? (
-              <SignUpButton mode="modal" forceRedirectUrl="/dashboard"><Button size="lg" className="h-12 px-8 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full font-semibold shadow-lg shadow-indigo-600/20 gap-2 text-base transition-all hover:scale-105 active:scale-95">
-                  Get started <ArrowRight className="w-4 h-4" />
-                </Button></SignUpButton>
+              <SignUpButton mode="modal" forceRedirectUrl="/dashboard">
+                <div>
+                  <Button size="lg" className="h-12 px-8 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full font-semibold shadow-lg shadow-indigo-600/20 gap-2 text-base transition-all hover:scale-105 active:scale-95">
+                    Get started <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              </SignUpButton>
             ) : (
               <Link href="/dashboard">
                 <Button size="lg" className="h-12 px-8 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full font-semibold shadow-lg shadow-indigo-600/20 gap-2 text-base transition-all hover:scale-105 active:scale-95">

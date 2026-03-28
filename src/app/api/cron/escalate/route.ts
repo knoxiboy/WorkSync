@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { runEscalationCheck } from "@/lib/escalation";
+import { runEscalationCheck } from "@/lib/services/escalation";
 
 export async function GET(req: Request) {
   // Simple secret check for "cron" (in production use a real auth header or Vercel Cron secret)

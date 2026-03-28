@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { sql } from "@/lib/neon";
+import { sql } from "@/lib/core/neon";
 import { createId } from "@paralleldrive/cuid2";
 import { runFollowUpAgent } from "@/lib/ai/followUpAgent";
-import { sendFollowUpNudge } from "@/lib/notifications";
+import { sendFollowUpNudge } from "@/lib/integrations/notifications";
 
 export async function GET() {
   try {
