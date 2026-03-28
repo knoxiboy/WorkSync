@@ -611,15 +611,16 @@ export default function SharedMeetingPage() {
     toast.info("Processing meeting intelligence...");
     
     try {
-      await fetch("/api/meeting/extract", {
+      const res = await fetch("/api/meeting/extract", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ transcript, roomId }),
       });
 
+      const data = await res.json();
       if (recognitionRef.current) recognitionRef.current.stop();
-      toast.success("Meeting intelligence processed!");
-      router.push("/dashboard");
+      toast.success("Meeting intelligence processed! Redirecting to review...");
+      router.push(`/review/${data.meetingId || roomId}`);
     } catch (error) {
       toast.error("Failed to extract tasks");
     } finally {
