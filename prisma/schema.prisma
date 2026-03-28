@@ -72,3 +72,17 @@ model Alert {
   message   String
   sentAt    DateTime @default(now())
 }
+
+model AgentDecisionLog {
+  id         String   @id
+  agentName  String
+  agentRole  String
+  input      String?
+  output     String?
+  confidence Float    @default(0)
+  reasoning  String?
+  durationMs Int      @default(0)
+  meetingId  String?
+  taskId     String?
+  createdAt  DateTime @default(now())
+}
