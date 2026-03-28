@@ -22,7 +22,9 @@ import {
   ShieldCheck,
   Zap,
   Play,
-  Sparkles
+  Sparkles,
+  Bot,
+  Brain
 } from "lucide-react";
 import Link from "next/link";
 
@@ -54,6 +56,16 @@ export default async function TaskDetailPage({ params }: { params: { taskId: str
     WHERE "taskId" = ${taskId}
     ORDER BY "createdAt" DESC
   `;
+
+  // Fetch agent decision logs for this task
+  let agentLogs: any[] = [];
+  try {
+    agentLogs = await sql`
+      SELECT * FROM "agent_decision_log"
+      WHERE "taskId" = ${taskId} OR "meetingId" = ${task.meetingId}
+      ORDER BY "createdAt" ASC
+    `;
+  } catch { /* table may not exist yet */ }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -312,7 +324,52 @@ export default async function TaskDetailPage({ params }: { params: { taskId: str
                     </div>
                     <Badge variant="outline" className="text-[8px] bg-white/5 border-white/10 text-slate-400">V1.0.4</Badge>
                  </div>
+                   <div className="space-y-4 pt-4 border-t border-white/10">
+                    <div className="flex justify-between items-center text-xs">
+                       <span className="text-slate-400 font-bold uppercase tracking-widest leading-none">Status Level</span>
+                       <Badge variant="outline" className="border-indigo-400/30 text-indigo-300 font-black">{task.status.toUpperCase()}</Badge>
+                    </div>
+                    <div className="flex justify-between items-center text-xs">
+                       <span className="text-slate-400 font-bold uppercase tracking-widest leading-none">Visibility</span>
+                       <span className="text-slate-200 font-bold">Public Space</span>
+                    </div>
+                 </div>
                </div>
+            </Card>
+
+            {/* AI Decision Trail */}
+            <Card className="border-none shadow-sm bg-white">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2 font-bold">
+                  <Bot className="w-5 h-5 text-indigo-500" /> AI Decision Trail
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {agentLogs.length === 0 ? (
+                  <div className="text-center py-6 text-slate-400 italic text-sm">
+                    No agent decisions recorded yet for this task.
+                  </div>
+                ) : (
+                  agentLogs.map((log: any) => (
+                    <div key={log.id} className="p-4 rounded-2xl border border-slate-100 bg-slate-50/80 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Brain className="w-3.5 h-3.5 text-indigo-500" />
+                          <span className="text-xs font-black uppercase tracking-widest text-indigo-600">{log.agentName}</span>
+                        </div>
+                        <span className="text-[10px] text-slate-400 font-mono">{log.durationMs}ms</span>
+                      </div>
+                      <p className="text-xs text-slate-600 leading-relaxed">{log.reasoning}</p>
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                          <div className="bg-indigo-500 h-full" style={{ width: `${Math.round(log.confidence * 100)}%` }} />
+                        </div>
+                        <span className="text-[10px] font-bold text-indigo-600">{Math.round(log.confidence * 100)}%</span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </CardContent>
             </Card>
           </div>
         </div>
