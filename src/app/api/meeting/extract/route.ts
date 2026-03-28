@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { sql } from "@/lib/neon";
+import { sql } from "@/lib/core/neon";
 import { randomBytes } from "crypto";
 import { runMeetingExtractionPipeline } from "@/lib/ai/agents";
 

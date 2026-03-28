@@ -7,8 +7,8 @@
  */
 
 import Groq from "groq-sdk";
-import { logAgentDecision } from "../agentLog";
-import { GitHubWork } from "../github";
+import { logAgentDecision } from "../services/agentLog";
+import { GitHubWork } from "../integrations/github";
 
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,

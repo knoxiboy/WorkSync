@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { sql } from "@/lib/neon";
+import { sql } from "@/lib/core/neon";
 import { ManagerDashboard } from "./ManagerDashboard";
 import { EmployeeDashboard } from "./EmployeeDashboard";
 

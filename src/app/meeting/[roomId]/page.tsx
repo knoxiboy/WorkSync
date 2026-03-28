@@ -2,7 +2,7 @@
 
 import { useUser } from "@clerk/nextjs";
 import { Loader2, ArrowLeft, Sparkles, Mic, Languages, Share2, MessageSquare, AlertTriangle, X, ChevronRight, UserPlus } from "lucide-react";
-import { TaskAssignmentModal } from "@/components/TaskAssignmentModal";
+import { TaskAssignmentModal } from "@/components/tasks/TaskAssignmentModal";
 import { useState, useEffect, useRef, useCallback, memo } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";

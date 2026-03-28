@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { sql } from "@/lib/neon";
+import { sql } from "@/lib/core/neon";
 import { randomBytes } from "crypto";
-import { parseGitHubUrl } from "@/lib/github-parser";
-import { fetchGitHubWork } from "@/lib/github";
+import { parseGitHubUrl } from "@/lib/integrations/github-parser";
+import { fetchGitHubWork } from "@/lib/integrations/github";
 import { evaluateSubmission } from "@/lib/ai/evaluateSubmission";
 
 const createId = () => randomBytes(12).toString('hex');

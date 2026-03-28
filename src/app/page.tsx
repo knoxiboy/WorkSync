@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Zap, ShieldCheck, LogIn, LayoutDashboard } from "lucide-react";
 import { SignInButton, UserButton, SignUpButton } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
-import { LogoutButton } from "@/components/LogoutButton";
+import { LogoutButton } from "@/components/layout/LogoutButton";
 
 export default async function Home() {
   const { userId } = await auth();

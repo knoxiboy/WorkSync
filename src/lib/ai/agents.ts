@@ -7,7 +7,7 @@
  */
 
 import Groq from "groq-sdk";
-import { logAgentDecision } from "../agentLog";
+import { logAgentDecision } from "../services/agentLog";
 
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
