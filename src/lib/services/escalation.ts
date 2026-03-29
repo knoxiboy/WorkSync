@@ -3,7 +3,7 @@
  * Automatically detects stalled or risky tasks.
  */
 
-import { sql } from "./neon";
+import { sql } from "@/lib/core/neon";
 import { randomBytes } from "crypto";
 
 const createId = () => randomBytes(12).toString('hex');
