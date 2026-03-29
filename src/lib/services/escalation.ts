@@ -1,5 +1,5 @@
 /**
- * ANTIGRAVITY Escalation Engine
+ * WorkSync Escalation Engine
  * Automatically detects stalled or risky tasks.
  */
 

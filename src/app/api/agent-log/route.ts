@@ -15,22 +15,21 @@ export async function GET(req: Request) {
     let logs;
     if (meetingId) {
       logs = await sql`
-        SELECT * FROM "agent_decision_log"
+        SELECT * FROM "AgentDecisionLog"
         WHERE "meetingId" = ${meetingId}
         ORDER BY "createdAt" ASC
         LIMIT ${limit}
       `;
     } else if (taskId) {
       logs = await sql`
-        SELECT * FROM "agent_decision_log"
+        SELECT * FROM "AgentDecisionLog"
         WHERE "taskId" = ${taskId}
         ORDER BY "createdAt" ASC
         LIMIT ${limit}
       `;
     } else {
-      // Return recent agent activity
       logs = await sql`
-        SELECT * FROM "agent_decision_log"
+        SELECT * FROM "AgentDecisionLog"
         ORDER BY "createdAt" DESC
         LIMIT ${limit}
       `;

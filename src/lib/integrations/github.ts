@@ -1,5 +1,5 @@
 /**
- * GitHub API Client for ANTIGRAVITY (WorkSyncAI)
+ * GitHub API Client for WorkSync (WorkSyncAI)
  * Uses the GitHub API to fetch PR/Commit diffs.
  */
 

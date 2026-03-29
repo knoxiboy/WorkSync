@@ -1,5 +1,5 @@
 /**
- * Multi-Agent Pipeline — ANTIGRAVITY (WorkSyncAI)
+ * Multi-Agent Pipeline — WorkSync (WorkSyncAI)
  * 
  * Agent 1: Transcript Analyzer — cleans & structures raw transcript
  * Agent 2: Task Orchestrator — extracts actionable tasks

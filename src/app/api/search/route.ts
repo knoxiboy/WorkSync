@@ -1,5 +1,5 @@
 /**
- * Tier 3: Cross-Meeting Context Search — ANTIGRAVITY (WorkSyncAI)
+ * Tier 3: Cross-Meeting Context Search — WorkSync (WorkSyncAI)
  * 
  * Synthesizes cross-meeting knowledge from transcripts and task histories.
  */

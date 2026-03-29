@@ -525,25 +525,32 @@ export default function SharedMeetingPage() {
       };
 
       recognitionRef.current.onerror = (event: any) => {
-        if (event.error === 'no-speech') return;
-        
+        if (event.error === 'no-speech') return; // silent, expected
+
         console.error("Speech Recognition Error:", event.error);
-        
-        // Handle network or aborted errors by attempting a restart
-        if ((event.error === 'network' || event.error === 'aborted') && isListeningRef.current) {
-          console.warn("Recoverable transcription error, attempting restart...");
-          setTimeout(() => {
-            if (isListeningRef.current && recognitionRef.current) {
-              try { recognitionRef.current.start(); } catch (e) {}
-            }
-          }, 1000);
+
+        if (event.error === 'audio-capture') {
+          toast.error("No microphone found. Please connect a mic and allow access.", { duration: 5000 });
+          setIsListening(false);
+          isListeningRef.current = false;
           return;
         }
 
         if (event.error === 'not-allowed') {
-          toast.error("Microphone access denied for transcription.");
+          toast.error("Microphone permission denied. Please allow access in your browser settings.", { duration: 5000 });
           setIsListening(false);
           isListeningRef.current = false;
+          return;
+        }
+
+        // network / aborted: attempt silent restart (common on localhost)
+        if ((event.error === 'network' || event.error === 'aborted') && isListeningRef.current) {
+          setTimeout(() => {
+            if (isListeningRef.current && recognitionRef.current) {
+              try { recognitionRef.current.start(); } catch (e) {}
+            }
+          }, 1500);
+          return;
         }
       };
 

@@ -1,5 +1,5 @@
 /**
- * Agent Decision Log — ANTIGRAVITY (WorkSyncAI)
+ * Agent Decision Log — WorkSync (WorkSyncAI)
  * Records every AI agent decision for full auditability.
  */
 
@@ -27,7 +27,7 @@ export async function logAgentDecision(decision: AgentDecision): Promise<string>
 
   try {
     await sql`
-      INSERT INTO "agent_decision_log" (
+      INSERT INTO "AgentDecisionLog" (
         "id", "agentName", "agentRole", "input", "output",
         "confidence", "reasoning", "durationMs",
         "meetingId", "taskId", "createdAt"

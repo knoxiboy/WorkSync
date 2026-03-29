@@ -1,5 +1,5 @@
 /**
- * Multi-Agent PR Evaluation Engine — ANTIGRAVITY (WorkSyncAI)
+ * Multi-Agent PR Evaluation Engine — WorkSync (WorkSyncAI)
  * 
  * Agent 1: Code Review Agent — evaluates code quality and best practices
  * Agent 2: Task Alignment Agent — checks if code implements the assigned task

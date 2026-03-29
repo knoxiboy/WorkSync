@@ -1,5 +1,5 @@
 /**
- * Tier 3: Global AI Search — ANTIGRAVITY (WorkSyncAI)
+ * Tier 3: Global AI Search — WorkSync (WorkSyncAI)
  * 
  * RAG-style search across meeting transcripts and task histories.
  */
@@ -52,6 +52,7 @@ export function GlobalSearch() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger 
+        nativeButton={false}
         render={
           <div className="relative group cursor-pointer">
             <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">

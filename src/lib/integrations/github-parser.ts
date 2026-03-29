@@ -1,6 +1,6 @@
 /**
  * GitHub URL Parser Utility
- * Designed for ANTIGRAVITY (WorkSyncAI)
+ * Designed for WorkSync (WorkSyncAI)
  */
 
 export interface GitHubMetadata {

@@ -91,7 +91,7 @@ export default function OnboardingPage() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 p-4 md:p-8 space-y-8">
       {/* Branding */}
       <div className="text-center space-y-2">
-        <h1 className="text-4xl font-black tracking-tight text-slate-900 uppercase italic">ANTIGRAVITY</h1>
+        <h1 className="text-4xl font-black tracking-tight text-slate-900 uppercase italic">WorkSync</h1>
         <p className="text-slate-500 font-medium tracking-widest text-xs uppercase">Developer Execution Platform</p>
       </div>
 

@@ -1,5 +1,5 @@
 /**
- * Tier 3: Sub-task Manager — ANTIGRAVITY (WorkSyncAI)
+ * Tier 3: Sub-task Manager — WorkSync (WorkSyncAI)
  * 
  * Interactive component to decompose a task and manage sub-tasks with AI guidance.
  */

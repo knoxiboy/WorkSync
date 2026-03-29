@@ -1,5 +1,5 @@
 /**
- * Tier 3: Resource Optimization — ANTIGRAVITY (WorkSyncAI)
+ * Tier 3: Resource Optimization — WorkSync (WorkSyncAI)
  * 
  * Interactive component to predict task-to-talent fitment and flag skill gaps.
  */

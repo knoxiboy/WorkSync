@@ -1,5 +1,5 @@
 /**
- * Tier 3: Predictive Resource Optimization Agent — ANTIGRAVITY (WorkSyncAI)
+ * Tier 3: Predictive Resource Optimization Agent — WorkSync (WorkSyncAI)
  * 
  * Analyzes team capacity and skills to optimize task assignments.
  */

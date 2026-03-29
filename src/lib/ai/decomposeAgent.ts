@@ -1,5 +1,5 @@
 /**
- * Tier 3: Auto-Scaling Sub-Task Decomposition Agent — ANTIGRAVITY (WorkSyncAI)
+ * Tier 3: Auto-Scaling Sub-Task Decomposition Agent — WorkSync (WorkSyncAI)
  * 
  * Breaks down complex tasks into atomic, executable sub-tasks.
  */
