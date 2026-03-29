@@ -70,7 +70,7 @@ export function MissionControlShell({ children }: { children: React.ReactNode })
       <aside className="w-64 flex flex-col glass-border bg-black/20 backdrop-blur-xl z-50">
         <div className="p-6">
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center neon-glow-cyan">
+            <div className="w-10 h-10 rounded-xl bg-linear-to-br from-primary to-secondary flex items-center justify-center neon-glow-cyan">
               <Terminal className="w-6 h-6 text-white" />
             </div>
             <div className="flex flex-col">
@@ -91,7 +91,7 @@ export function MissionControlShell({ children }: { children: React.ReactNode })
           <NavItem href="/team" icon={Users} label="Team Nexus" active={pathname === "/team"} />
         </nav>
 
-        <div className="p-4 mt-auto border-t border-white/5 bg-white/[0.02]">
+        <div className="p-4 mt-auto border-t border-white/5 bg-white/2">
           <NavItem href="/settings" icon={Settings} label="System Config" active={pathname === "/settings"} />
           <div className="mt-4 flex items-center justify-between px-3 py-2 bg-white/5 rounded-xl border border-white/5">
             <UserButton afterSignOutUrl="/" appearance={{ elements: { userButtonAvatarBox: "w-8 h-8 rounded-lg" } }} />
@@ -229,7 +229,7 @@ export function MissionControlShell({ children }: { children: React.ReactNode })
                     "[09:43:05] validation_loop success."
                   ].map((log, i) => (
                     <div key={i} className="text-muted-foreground flex gap-2">
-                      <span className="text-primary/50 flex-shrink-0">›</span>
+                      <span className="text-primary/50 shrink-0">›</span>
                       <span>{log}</span>
                     </div>
                   ))}

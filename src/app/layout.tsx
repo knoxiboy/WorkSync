@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "sonner";
 import "./globals.css";
+import { MissionControlShell } from "@/components/layout/MissionControlShell";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "WorkSyncAI",
-  description: "AI-powered workspace synchronization",
+  title: "WorkSyncAI | Mission Control",
+  description: "AI-powered workspace orchestration for the year 2030",
 };
 
 export default function RootLayout({
@@ -28,10 +29,13 @@ export default function RootLayout({
     <ClerkProvider>
       <html
         lang="en"
-        className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
+        style={{ colorScheme: "dark" }}
       >
-        <body className="min-h-full flex flex-col">
-          {children}
+        <body className="min-h-full flex flex-col bg-background text-foreground">
+          <MissionControlShell>
+            {children}
+          </MissionControlShell>
           <Toaster position="top-center" richColors />
         </body>
       </html>
