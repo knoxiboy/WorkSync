@@ -22,6 +22,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { UserButton } from "@clerk/nextjs";
 import { ActivityStream } from "@/components/ai/ActivityStream";
+import { GlobalCommandHUD } from "./GlobalCommandHUD";
 
 interface NavItemProps {
   href: string;

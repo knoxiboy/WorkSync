@@ -15,10 +15,13 @@ import {
   ArrowRight,
   TrendingUp,
   MessageSquare,
-  ShieldCheck
+  ShieldCheck,
+  Activity,
+  Layout
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 export function EmployeeDashboard({ 
@@ -62,7 +65,7 @@ export function EmployeeDashboard({
 
           {/* FOCUS MODE TOGGLE */}
           <div className="p-2 rounded-3xl bg-white/5 border border-white/5 flex items-center gap-2">
-            <Button 
+            <button 
               onClick={() => setIsFocusMode(!isFocusMode)}
               className={cn(
                 "h-12 px-6 rounded-2xl flex items-center gap-2 font-black uppercase tracking-widest text-[10px] transition-all",
@@ -71,7 +74,7 @@ export function EmployeeDashboard({
             >
               {isFocusMode ? <Zap className="w-4 h-4 fill-current" /> : <Brain className="w-4 h-4" />}
               {isFocusMode ? "Focus Active" : "Enter Deep Work"}
-            </Button>
+            </button>
             {isFocusMode && (
               <div className="px-4 text-lg font-mono font-bold text-primary">
                 {Math.floor(timer / 60)}:{(timer % 60).toString().padStart(2, '0')}
@@ -169,7 +172,7 @@ export function EmployeeDashboard({
           {/* RIGHT: PERSONAL NEURAL INTEL */}
           <div className="space-y-8">
             {/* PRODUCTIVITY GRAPH MOCK */}
-            <Card className="rounded-[2.5rem] bg-black/40 border-white/5 p-8 space-y-6">
+            <div className="rounded-[2.5rem] bg-black/40 border-white/5 p-8 space-y-6 border">
                <div className="space-y-1">
                 <h2 className="text-xl font-black uppercase tracking-tight italic text-primary">Neural Stats</h2>
                 <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Productivity Entropy</p>
@@ -196,10 +199,10 @@ export function EmployeeDashboard({
                   <div className="text-xl font-black tracking-tight text-primary">Low</div>
                 </div>
               </div>
-            </Card>
+            </div>
 
             {/* RECENT NOTIFICATIONS / CHAT */}
-            <Card className="rounded-[2.5rem] bg-black/40 border-white/5 p-8 space-y-6">
+            <div className="rounded-[2.5rem] bg-black/40 border-white/5 p-8 space-y-6 border">
               <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                 <MessageSquare className="w-4 h-4 text-primary" />
                 Recent Context
@@ -218,19 +221,10 @@ export function EmployeeDashboard({
                   </div>
                 ))}
               </div>
-            </Card>
+            </div>
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-// Sub-component wrapper for consistent card styling
-function Card({ children, className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div className={cn("rounded-3xl border", className)} {...props}>
-      {children}
     </div>
   );
 }
