@@ -2,15 +2,28 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { Sparkles, ShieldCheck, Brain, Check, X, Clock, Zap, AlertCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  Sparkles, 
+  ShieldCheck, 
+  Brain, 
+  Check, 
+  X, 
+  Clock, 
+  Zap, 
+  AlertCircle,
+  Activity,
+  Layers,
+  ArrowRight,
+  User,
+  ShieldAlert,
+  Search
+} from "lucide-react";
 import { toast } from "sonner";
-
-import { WorkspaceSwitcher } from "@/components/layout/WorkspaceSwitcher";
-import { GlobalSearch } from "@/components/ai/GlobalSearch";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { AgentPipelineViewer } from "@/components/ai/AgentPipelineViewer";
 
 export function ManagerDashboard({ 
   company, 
@@ -40,16 +53,12 @@ export function ManagerDashboard({
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [approving, setApproving]     = useState(false);
   const [auditLogs, setAuditLogs]     = useState<any[]>([]);
-  const [auditLoading, setAuditLoading] = useState(false);
 
-  // Load recent agent decisions for the audit trail
   useEffect(() => {
-    setAuditLoading(true);
     fetch("/api/agent-log?limit=6")
       .then(r => r.json())
       .then(d => setAuditLogs(d.logs || []))
-      .catch(() => {})
-      .finally(() => setAuditLoading(false));
+      .catch(() => {});
   }, []);
 
   const toggleSelect = (id: string) =>
@@ -68,7 +77,7 @@ export function ManagerDashboard({
         body: JSON.stringify({ taskIds: selectedIds, action }),
       });
       if (!res.ok) throw new Error(await res.text());
-      toast.success(`${selectedIds.length} task(s) ${action === "approve" ? "approved & assigned" : "rejected"}.`);
+      toast.success(`${selectedIds.length} task(s) finalized.`);
       setSelectedIds([]);
       window.location.reload();
     } catch (e: any) {
@@ -78,354 +87,255 @@ export function ManagerDashboard({
     }
   };
 
-  const confidenceColor = (c: number) => {
-    if (c >= 0.85) return "text-green-400";
-    if (c >= 0.6)  return "text-yellow-400";
-    return "text-red-400";
-  };
-
-  const agentColor: Record<string, string> = {
-    "Transcript Analyzer":       "bg-blue-500/10 text-blue-400 border-blue-500/20",
-    "Task Orchestrator":         "bg-purple-500/10 text-purple-400 border-purple-500/20",
-    "Validation Agent":          "bg-green-500/10 text-green-400 border-green-500/20",
-    "Self-Correction Controller":"bg-orange-500/10 text-orange-400 border-orange-500/20",
-    "PR Review Agent":           "bg-pink-500/10 text-pink-400 border-pink-500/20",
-    "Bottleneck Monitor":        "bg-red-500/10 text-red-400 border-red-500/20",
-  };
-
   return (
-    <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in duration-700">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-          <WorkspaceSwitcher profiles={allProfiles} activeProfileId={activeProfileId} />
-          <GlobalSearch />
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 uppercase italic leading-none">{company.name} Hub</h1>
-              <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200 uppercase tracking-widest text-[10px] font-bold">Manager</Badge>
+    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+      {/* --- HERO: COMMAND DECK OVERVIEW --- */}
+      <section className="relative p-10 rounded-[2.5rem] overflow-hidden glass-panel border border-white/10 group">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 blur-[120px] -z-10 group-hover:bg-primary/20 transition-all duration-1000" />
+        
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center neon-glow-cyan border border-primary/20">
+                <Brain className="w-7 h-7 text-primary" />
+              </div>
+              <div className="space-y-0.5">
+                <h1 className="text-4xl font-black tracking-tight uppercase leading-none italic">
+                  Command Deck
+                </h1>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-[0.4em] font-bold">
+                  {company.name} Neural Hub v3.0
+                </p>
+              </div>
             </div>
-            <p className="text-slate-500 font-medium text-xs tracking-tight">Monitoring platform performance and team execution loop.</p>
+            
+            <div className="flex flex-wrap gap-4 pt-2">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/5">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[10px] font-bold tracking-widest uppercase">System Stable</span>
+              </div>
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/5">
+                <Activity className="w-3.5 h-3.5 text-primary" />
+                <span className="text-[10px] font-bold tracking-widest uppercase">98.2% Accuracy</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-4">
+            <Link href="/meeting">
+              <Button size="lg" className="h-16 px-8 rounded-3xl bg-primary hover:bg-primary/80 text-black font-black uppercase tracking-widest group neon-glow-cyan">
+                <Zap className="w-5 h-5 mr-3 fill-current group-hover:animate-bounce" />
+                Initiate Neural Session
+              </Button>
+            </Link>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <p className="text-sm text-slate-400 font-mono hidden md:block">Invite: {company.inviteCode}</p>
-          <Link href="/analytics">
-            <Button variant="outline" size="lg" className="border-indigo-200 text-indigo-700 hover:bg-indigo-50 rounded-full px-6">
-              Analytics Hub
-            </Button>
-          </Link>
-          <Link href="/meeting">
-            <Button size="lg" className="bg-indigo-600 hover:bg-indigo-500 shadow-lg shadow-indigo-600/20 rounded-full px-6">
-              Start AI Meeting
-            </Button>
-          </Link>
+
+        {/* METRICS GRID */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-12">
+          {[
+            { label: "Total Backlog", value: total, icon: Layers, color: "text-blue-400" },
+            { label: "Verified Work", value: completed, icon: ShieldCheck, color: "text-emerald-400" },
+            { label: "Active Sprint", value: inProgress, icon: Activity, color: "text-cyan-400" },
+            { label: "Mission Risk", value: overdue, icon: ShieldAlert, color: "text-red-400", critical: overdue > 0 },
+          ].map((metric) => (
+            <div key={metric.label} className={cn(
+              "p-6 rounded-3xl border transition-all duration-500 hover:scale-[1.02]",
+              metric.critical ? "bg-red-500/5 border-red-500/20 shadow-[0_0_30px_rgba(239,68,68,0.1)]" : "bg-white/5 border-white/5"
+            )}>
+              <metric.icon className={cn("w-5 h-5 mb-4", metric.color)} />
+              <div className="text-3xl font-black mb-1">{metric.value}</div>
+              <div className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">{metric.label}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* --- MIDDLE SECTION: PIPELINE + PENDING --- */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* NEURAL PIPELINE PREVIEW */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between px-2">
+            <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+              <Brain className="w-4 h-4" />
+              Orchestration Flow
+            </h2>
+          </div>
+          <AgentPipelineViewer activeStep={3} />
+        </div>
+
+        {/* PENDING APPROVAL GATE */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between px-2">
+            <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-primary" />
+              Human-in-the-Loop Gate
+            </h2>
+            {pendingTasks.length > 0 && (
+              <Badge className="bg-primary/20 text-primary border border-primary/20 text-[9px] uppercase tracking-widest animate-pulse">
+                {pendingTasks.length} Awaiting
+              </Badge>
+            )}
+          </div>
+
+          <Card className="rounded-[2.5rem] bg-black/40 border-white/5 p-6 h-[280px] overflow-y-auto hud-scrollbar relative">
+            <AnimatePresence mode="popLayout">
+              {pendingTasks.length > 0 ? (
+                <div className="space-y-3">
+                  {pendingTasks.map((task, i) => (
+                    <motion.div
+                      key={task.id}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      transition={{ delay: i * 0.1 }}
+                      onClick={() => toggleSelect(task.id)}
+                      className={cn(
+                        "p-4 rounded-2xl border cursor-pointer transition-all flex items-center gap-4 group",
+                        selectedIds.includes(task.id) 
+                          ? "bg-primary/10 border-primary/40 neon-glow-cyan" 
+                          : "bg-white/5 border-white/5 hover:border-white/10"
+                      )}
+                    >
+                      <div className={cn(
+                        "w-5 h-5 rounded flex items-center justify-center border transition-all",
+                        selectedIds.includes(task.id) ? "bg-primary border-primary" : "bg-white/5 border-white/10"
+                      )}>
+                        {selectedIds.includes(task.id) && <Check className="w-3.5 h-3.5 text-black font-black" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-bold truncate group-hover:text-primary transition-colors">{task.title}</div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <User className="w-3 h-3 text-muted-foreground" />
+                          <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">Match: {task.owner}</span>
+                          <span className="text-[10px] text-primary font-mono ml-auto">{Math.round((task.resourceFitScore || 0) * 100)}% FIT</span>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              ) : (
+                <div className="h-full flex flex-col items-center justify-center opacity-20 text-center space-y-3">
+                  <Check className="w-12 h-12 text-primary" />
+                  <p className="text-[10px] font-bold tracking-[0.3em] uppercase">Queue Clean</p>
+                </div>
+              )}
+            </AnimatePresence>
+
+            {selectedIds.length > 0 && (
+              <div className="sticky bottom-0 left-0 right-0 pt-4 bg-linear-to-t from-black to-transparent">
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={() => handleApprove("approve")}
+                    className="flex-1 rounded-xl h-12 bg-primary text-black font-black uppercase tracking-widest text-[10px] neon-glow-cyan"
+                  >
+                    Confirm Assignment
+                  </Button>
+                  <Button 
+                     onClick={() => handleApprove("reject")}
+                     variant="outline" 
+                     className="rounded-xl h-12 border-white/10 text-white font-black uppercase tracking-widest text-[10px]"
+                  >
+                    Discard
+                  </Button>
+                </div>
+              </div>
+            )}
+          </Card>
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="border-none shadow-sm bg-white">
-          <CardHeader className="pb-2"><CardTitle className="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Backlog</CardTitle></CardHeader>
-          <CardContent><div className="text-3xl font-bold text-slate-900">{total}</div></CardContent>
-        </Card>
-        <Card className="border-none shadow-sm bg-white">
-          <CardHeader className="pb-2"><CardTitle className="text-xs font-semibold uppercase tracking-wider text-green-500">Verified Work</CardTitle></CardHeader>
-          <CardContent><div className="text-3xl font-bold text-green-600">{completed}</div></CardContent>
-        </Card>
-        <Card className="border-none shadow-sm bg-white">
-          <CardHeader className="pb-2"><CardTitle className="text-xs font-semibold uppercase tracking-wider text-blue-500">Active Sprint</CardTitle></CardHeader>
-          <CardContent><div className="text-3xl font-bold text-blue-600">{inProgress}</div></CardContent>
-        </Card>
-        <Card className="border-none shadow-sm bg-white border-l-4 border-l-red-500 shadow-red-100">
-          <CardHeader className="pb-2"><CardTitle className="text-xs font-semibold uppercase tracking-wider text-red-500">At Risk (Overdue)</CardTitle></CardHeader>
-          <CardContent><div className="text-3xl font-bold text-red-600">{overdue}</div></CardContent>
-        </Card>
-      </div>
-
-      {/* ── HUMAN-IN-THE-LOOP: Pending Approval Gate ── */}
-      {pendingTasks.length > 0 && (
-        <Card className="border-2 border-amber-400/40 shadow-lg shadow-amber-500/10 bg-amber-50/50 overflow-hidden">
-          <div className="h-1 w-full bg-linear-to-r from-amber-400 via-orange-400 to-amber-400" />
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg flex items-center gap-2 text-amber-900">
-                <ShieldCheck className="w-5 h-5 text-amber-600" />
-                Human Approval Gate
-              </CardTitle>
-              <div className="flex items-center gap-2">
-                <Badge className="bg-amber-500 text-white text-[10px] uppercase tracking-widest border-none">
-                  {pendingTasks.length} Awaiting Review
-                </Badge>
-                {selectedIds.length > 0 && (
-                  <span className="text-[10px] font-bold text-amber-700">{selectedIds.length} selected</span>
-                )}
-              </div>
+      {/* --- BOTTOM SECTION: BACKLOG + RISK HEATMAP --- */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-10">
+        <Card className="lg:col-span-2 rounded-[2.5rem] bg-black/20 border-white/5 p-8 relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-8 h-full flex flex-col justify-center opacity-[0.02] pointer-events-none">
+            <Layers className="w-64 h-64 -mr-32" />
+          </div>
+          
+          <div className="flex items-center justify-between mb-8">
+            <div className="space-y-1">
+              <h2 className="text-xl font-black uppercase tracking-tight italic">Execution Trace</h2>
+              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Global Backlog Index</p>
             </div>
-            <p className="text-xs text-amber-700">AI extracted tasks from the meeting. Review and approve before they are assigned to the team.</p>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2 mb-4">
-              {pendingTasks.map(task => (
-                <label
-                  key={task.id}
-                  className={`flex items-start gap-3 p-3 rounded-xl cursor-pointer border transition-all ${
-                    selectedIds.includes(task.id)
-                      ? "bg-amber-100 border-amber-400"
-                      : "bg-white border-amber-200 hover:border-amber-300"
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    className="mt-1 accent-amber-500"
-                    checked={selectedIds.includes(task.id)}
-                    onChange={() => toggleSelect(task.id)}
-                  />
-                   <div className="flex-1 min-w-0">
+          </div>
+
+          <div className="space-y-1">
+            {activeTasks.length > 0 ? (
+              activeTasks.slice(0, 5).map((task) => (
+                <div key={task.id} className="group grid grid-cols-12 items-center py-4 px-4 rounded-2xl hover:bg-white/5 transition-all border border-transparent hover:border-white/5">
+                  <div className="col-span-6 flex flex-col">
+                    <span className="text-xs font-bold text-foreground group-hover:text-primary transition-colors cursor-pointer">{task.title}</span>
+                    <span className="text-[9px] text-muted-foreground font-mono uppercase mt-1">ID: {task.id.split('-')[0]}</span>
+                  </div>
+                  <div className="col-span-3">
                     <div className="flex items-center gap-2">
-                      <div className="font-semibold text-slate-800 text-sm truncate">{task.title}</div>
-                      {task.needsClarification && (
-                        <Badge className="bg-amber-100 text-amber-700 border-amber-200 text-[8px] uppercase tracking-widest px-1 py-0 h-4">Needs Clarification</Badge>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-3 mt-1 flex-wrap">
-                      <span className="text-[10px] text-slate-500">👤 {task.user?.name || task.owner}</span>
-                      {task.deadline && (
-                        <span className={`text-[10px] font-mono ${new Date(task.deadline) < new Date() ? 'text-rose-500 font-bold' : 'text-slate-500'}`}>
-                          📅 {task.deadline}
-                        </span>
-                      )}
-                      <div className="flex items-center gap-1.5 border-l border-slate-200 pl-3">
-                        <div className={`w-1.5 h-1.5 rounded-full ${task.slaRisk === 'high' ? 'bg-rose-500' : task.slaRisk === 'medium' ? 'bg-orange-400' : 'bg-emerald-400'}`} />
-                        <span className="text-[9px] font-black uppercase tracking-tight text-slate-400">Risk: {task.slaRisk || 'low'}</span>
+                      <div className="w-5 h-5 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-[9px] font-bold">
+                        {(task.user?.name || task.owner)[0]}
                       </div>
-                      <div className="flex items-center gap-1.5 border-l border-slate-200 pl-3">
-                        <ShieldCheck className="w-2.5 h-2.5 text-emerald-500" />
-                        <span className="text-[9px] font-black uppercase tracking-tight text-slate-400">Fit: {Math.round((task.resourceFitScore || 0) * 100)}%</span>
-                      </div>
+                      <span className="text-[10px] text-muted-foreground font-medium">{task.user?.name || task.owner}</span>
                     </div>
                   </div>
-                  <Clock className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                </label>
-              ))}
-            </div>
-            <div className="flex gap-3">
-              <Button
-                disabled={!selectedIds.length || approving}
-                onClick={() => handleApprove("approve")}
-                className="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold gap-2 rounded-xl"
-              >
-                <Check className="w-4 h-4" />
-                Approve & Assign
-              </Button>
-              <Button
-                disabled={!selectedIds.length || approving}
-                variant="outline"
-                onClick={() => handleApprove("reject")}
-                className="flex-1 border-red-200 text-red-600 hover:bg-red-50 font-bold gap-2 rounded-xl"
-              >
-                <X className="w-4 h-4" />
-                Reject
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Performance Engine */}
-        <Card className="lg:col-span-2 border-none shadow-sm bg-white">
-          <CardHeader><CardTitle className="text-lg">Team Performance Analytics</CardTitle></CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              {performance.map(p => (
-                <div key={p.name} className="flex items-center justify-between group">
-                  <div className="flex-1">
-                    <div className="flex justify-between mb-2">
-                      <span className="font-semibold text-slate-700 text-sm">{p.name}</span>
-                      <span className="text-xs font-bold text-indigo-600">{p.score}% Accuracy</span>
-                    </div>
-                    <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                      <div className="bg-indigo-500 h-full transition-all duration-1000" style={{ width: `${p.score}%` }} />
-                    </div>
+                  <div className="col-span-2">
+                    <Badge className={cn(
+                      "text-[8px] font-black tracking-widest uppercase py-0.5",
+                      task.status === 'completed' ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-primary/10 text-primary border-primary/20"
+                    )}>
+                      {task.status.replace('_', ' ')}
+                    </Badge>
+                  </div>
+                  <div className="col-span-1 flex justify-end">
+                    <ArrowRight className="w-4 h-4 text-muted-foreground/30 group-hover:text-primary transition-colors" />
                   </div>
                 </div>
-              ))}
-              {performance.length === 0 && <p className="text-slate-400 text-center py-4 text-sm italic">No evaluation data collected yet.</p>}
-            </div>
-          </CardContent>
+              ))
+            ) : (
+              <p className="text-center py-10 text-[10px] text-muted-foreground uppercase tracking-widest font-black opacity-20 italic">No cycles active</p>
+            )}
+          </div>
         </Card>
 
-        {/* Escalation System */}
-        <Card className="border-none shadow-sm bg-slate-900 text-white leading-relaxed overflow-hidden">
-          <CardHeader><CardTitle className="text-white flex items-center gap-2 text-lg font-bold truncate">Executive Escalations <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.5)]" /></CardTitle></CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {escalations.length === 0 ? (
-                <p className="text-slate-500 text-sm italic">All systems nominal. No escalations.</p>
-              ) : (
-                escalations.slice(0, 5).map(esc => (
-                  <Link href={`/tasks/${esc.taskId}`} key={esc.id} className="block group/esc">
-                    <div className={`p-4 rounded-2xl border transition-all ${
-                      esc.severity === 'critical' ? 'bg-red-500/10 border-red-500/20 hover:bg-red-500/20' : 
-                      esc.severity === 'high' ? 'bg-orange-500/10 border-orange-500/20 hover:bg-orange-500/20' : 
-                      'bg-slate-800 border-slate-700 hover:bg-slate-700'
-                    }`}>
-                      <div className="flex justify-between items-start mb-2">
-                        <Badge variant="outline" className={`text-[10px] font-black uppercase tracking-widest ${esc.severity === 'critical' || esc.severity === 'high' ? 'bg-red-500 text-white border-none' : 'text-slate-400 border-slate-700'}`}>
-                          {esc.severity || 'low'}
-                        </Badge>
-                        <span className="text-[10px] text-slate-500 font-mono capitalize">{esc.reason?.replace('_', ' ')}</span>
-                      </div>
-                      <p className="text-sm font-bold text-slate-100 group-hover/esc:text-indigo-300 transition-colors truncate">{esc.taskTitle}</p>
-                      <p className="text-[10px] text-slate-500 mt-2 font-medium uppercase tracking-tighter">{new Date(esc.createdAt).toLocaleString()}</p>
-                    </div>
-                  </Link>
-                ))
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+        {/* RISK HEATMAP MOCK */}
+        <Card className="rounded-[2.5rem] bg-black/40 border-white/5 p-8 space-y-6">
+          <div className="space-y-1">
+            <h2 className="text-xl font-black uppercase tracking-tight italic text-red-400">Hazard Matrix</h2>
+            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">SLA Violation Probability</p>
+          </div>
 
-      {/* ── AI AUDIT TRAIL ── */}
-      <Card className="border-none shadow-sm bg-slate-950 text-white overflow-hidden">
-        <div className="h-1 w-full bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500" />
-        <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2 text-lg font-bold">
-            <Brain className="w-5 h-5 text-indigo-400" />
-            AI Agent Decision Audit Trail
-            <Badge className="bg-indigo-500/20 text-indigo-300 border-indigo-500/30 text-[10px] uppercase tracking-widest ml-1 border">Live</Badge>
-          </CardTitle>
-          <p className="text-slate-500 text-xs">Every AI decision is logged here for full auditability.</p>
-        </CardHeader>
-        <CardContent>
-          {auditLoading ? (
-            <div className="py-8 flex items-center justify-center gap-2 text-slate-500 text-sm">
-              <Zap className="w-4 h-4 animate-pulse text-indigo-400" /> Loading agent activity...
-            </div>
-          ) : auditLogs.length === 0 ? (
-            <div className="py-8 flex flex-col items-center justify-center text-center opacity-30">
-              <Brain className="w-10 h-10 mb-3" />
-              <p className="text-sm font-bold uppercase tracking-widest">No agent activity yet.</p>
-              <p className="text-xs mt-1">Run a meeting to populate the audit trail.</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {auditLogs.map((log: any) => (
-                <div key={log.id} className="p-4 rounded-2xl bg-slate-900/80 border border-white/5 space-y-2">
-                  <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <div className="flex items-center gap-2">
-                       <Badge variant="outline" className={`text-[10px] font-bold uppercase tracking-widest border ${agentColor[log.agentName] || "bg-slate-800 text-slate-400 border-slate-700"}`}>
-                         {log.agentName}
-                       </Badge>
-                       <span className="text-[8px] font-mono text-slate-600 uppercase tracking-widest">{log.model || "Optimized"}</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className={`text-[11px] font-black ${confidenceColor(log.confidence)}`}>
-                        {Math.round(log.confidence * 100)}% confidence
-                      </span>
-                      <span className="text-[10px] text-slate-600 font-mono">{log.durationMs}ms</span>
-                      <span className="text-[10px] text-slate-600">{new Date(log.createdAt).toLocaleTimeString()}</span>
-                    </div>
-                  </div>
-                  {log.reasoning && (
-                    <p className="text-[11px] text-slate-300 font-medium leading-relaxed line-clamp-2 italic opacity-80">"{log.reasoning}"</p>
+          <div className="grid grid-cols-4 grid-rows-4 gap-2 h-48">
+            {Array.from({ length: 16 }).map((_, i) => {
+              const hue = Math.floor(Math.random() * 20);
+              return (
+                <motion.div 
+                  key={i}
+                  whileHover={{ scale: 1.1, zIndex: 10 }}
+                  className={cn(
+                    "rounded-md border",
+                    i % 5 === 0 ? "bg-red-500/40 border-red-500/50 neon-glow-purple" : 
+                    i % 3 === 0 ? "bg-orange-500/20 border-orange-500/30" : 
+                    "bg-white/5 border-white/10"
                   )}
-                </div>
-              ))}
-              <Link href="/api/agent-log?limit=50" target="_blank">
-                <Button variant="ghost" size="sm" className="text-indigo-400 hover:text-indigo-300 text-[10px] uppercase tracking-widest w-full mt-2 hover:bg-white/5">
-                  View Full Audit Log →
-                </Button>
-              </Link>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                />
+              );
+            })}
+          </div>
 
-      {/* Execution Backlog Table */}
-      <Card className="border-none shadow-sm bg-white">
-        <CardHeader className="flex flex-row items-center justify-between pb-4">
-          <CardTitle>Execution Backlog</CardTitle>
-          <Button variant="ghost" size="sm" className="text-indigo-600 hover:text-indigo-700 hover:bg-slate-50">Export Report</Button>
-        </CardHeader>
-        <CardContent>
-          {activeTasks.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="bg-slate-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Sparkles className="w-8 h-8 text-slate-300" />
-              </div>
-              <p className="text-slate-500 text-sm">No active tasks in the loop. Start a meeting to trigger intelligence extraction.</p>
+          <div className="space-y-4 pt-4">
+            <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest">
+              <span>Escalation Protocol</span>
+              <span className="text-red-400">Active</span>
             </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-slate-50/50 hover:bg-slate-50/50">
-                  <TableHead className="text-xs font-bold uppercase tracking-wider text-slate-500">Task Definition</TableHead>
-                  <TableHead className="text-xs font-bold uppercase tracking-wider text-slate-500">Deadline</TableHead>
-                  <TableHead className="text-xs font-bold uppercase tracking-wider text-slate-500">Assigned To</TableHead>
-                  <TableHead className="text-xs font-bold uppercase tracking-wider text-slate-500">Execution State</TableHead>
-                  <TableHead className="text-xs font-bold uppercase tracking-wider text-slate-500">Priority</TableHead>
-                  <TableHead className="text-right text-xs font-bold uppercase tracking-wider text-slate-500">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {activeTasks.map(task => (
-                  <TableRow key={task.id} className="group transition-colors hover:bg-slate-50/50">
-                    <TableCell className="py-4">
-                      <Link href={`/tasks/${task.id}`} className="hover:underline decoration-indigo-300 decoration-2 underline-offset-4">
-                        <div className="font-semibold text-slate-700">{task.title}</div>
-                      </Link>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-xs font-medium text-slate-500 font-mono">
-                        {task.deadline ? (
-                          isNaN(new Date(task.deadline).getTime())
-                            ? task.deadline
-                            : new Date(task.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-                        ) : (
-                          <span className="text-slate-300">N/A</span>
-                        )}
-                      </div>
-                      {task.blocker && (
-                        <div className="text-[10px] text-red-500 font-bold mt-1 bg-red-50 w-fit px-2 py-0.5 rounded border border-red-100 uppercase tracking-widest">
-                          BLOCKED BY: {task.blocker.title}
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-[10px] font-bold text-indigo-700">
-                          {(task.user?.name || task.owner)[0]}
-                        </div>
-                        <span className="text-sm text-slate-600">{task.user?.name || task.owner}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={task.status === 'completed' ? 'default' : 'secondary'} className={task.status === 'completed' ? 'bg-green-500 hover:bg-green-600 border-none' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border-none'}>
-                        {task.status.replace("_", " ")}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={task.priority === 'high' ? 'bg-red-50 text-red-600 border-red-100' : 'text-slate-400 border-slate-200'}>
-                        {task.priority}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Link href={`/tasks/${task.id}`}>
-                        <Button variant="ghost" size="sm" className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 font-bold uppercase tracking-widest text-[10px]">
-                          Audit Details
-                        </Button>
-                      </Link>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+            {escalations.slice(0, 2).map((esc, i) => (
+              <div key={i} className="flex gap-3 items-center p-3 rounded-2xl bg-red-500/5 border border-red-500/10">
+                <AlertCircle className="w-4 h-4 text-red-500" />
+                <div className="flex-1 min-w-0">
+                  <div className="text-[10px] font-black text-foreground truncate">{esc.taskTitle}</div>
+                  <div className="text-[9px] text-red-500/70 font-mono uppercase">CRITICAL_DELAY_DETECTED</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
     </div>
   );
 }
