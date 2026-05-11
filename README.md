@@ -1,113 +1,178 @@
-# WorkSyncAI ⚡️
-**AI-Powered Workspace Orchestration & Team Performance Intelligence**
+<div align="center">
+  <img src="https://via.placeholder.com/1200x300/020617/38bdf8?text=WorkSyncAI" alt="WorkSyncAI Banner">
+</div>
 
-WorkSyncAI transforms meeting transcripts into actionable tasks and evaluates developer performance through automated AI-driven GitHub PR reviews. Built for agile teams that need precision, accountability, and zero-friction execution loops.
+# WorkSyncAI 
 
-## 🚀 Key Features
+> **AI-Powered Workspace Orchestration & Team Performance Intelligence.**
 
-- **Live AI Transcription**: Real-time speech-to-text during meetings using standard Web Speech APIs.
-- **Meeting to Action Flow**: Extracts actionable items from transcripts, assigns owners based on context, and creates tracked project tasks.
-- **Ambiguity Detection**: The AI is programmed to ask for clarification rather than guessing when a task owner or requirement is ambiguous.
-- **Automated Summaries**: Instantly emails a concise summary and list of action items to all meeting participants.
-- **Automated PR Evaluation**: AI-driven code reviews that evaluate PR correctness, quality, and completeness against assigned tasks.
-- **Manager Dashboard**: High-level visibility into team backlog, verified work, active sprints, and at-risk overdue tasks with automated escalation alerts.
-- **Proactive AI Cron Jobs**: Automated background jobs detect SLA risks, send follow-up nudges, and escalate bottlenecks before they block the sprint.
-- **Employee Hub**: Focused task views with integrated PR submission workflows.
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Online-00C7B7?style=for-the-badge&logo=vercel)](#)
+[![Documentation](https://img.shields.io/badge/Docs-Read-blue?style=for-the-badge&logo=read-the-docs)](#)
+[![License](https://img.shields.io/badge/license-MIT-purple.svg?style=for-the-badge)](LICENSE)
 
-## 🛠 Tech Stack
+---
 
-- **Framework**: [Next.js 16 (App Router)](https://nextjs.org/)
-- **Authentication**: [Clerk](https://clerk.com/)
-- **Database**: [Prisma](https://www.prisma.io/) with PostgreSQL
-- **AI Engine**: [GROQ SDK](https://groq.com/) (Llama 3.3 models)
-- **Video Conferencing**: [LiveKit](https://livekit.io/)
-- **UI Components**: [Shadcn UI](https://ui.shadcn.com/) & [Tailwind CSS 4+](https://tailwindcss.com/)
-- **Icons**: [Lucide React](https://lucide.dev/)
+## Preview
 
-### SDLC, Delivery & Security Strategy
-- **Edge Layer Protection**: `middleware.ts` encapsulates basic global rate limiting logic to guard API pathways.
-- **Verification via Live Feedback**: Pull Request analyses are surfaced directly enforcing a tight feedback-refactor loop.
-- **State Management**: Safe and strict execution paths are verified using structured agent orchestration in `Task Orchestrator`.
+<div align="center">
+  <img src="https://via.placeholder.com/800x400/0f172a/38bdf8?text=Manager+Dashboard" alt="WorkSyncAI Dashboard">
+  <p><i>Transforming meetings into accountability.</i></p>
+</div>
 
-## 🏗 Multi-Agent Architecture
+---
 
-WorkSync AI uses a specialized **Multi-Agent Orchestration Layer** for high-precision task extraction and automated work verification.
+## Table of Contents
 
-```mermaid
-graph TD
-    A[Meeting transcript] --> B(Transcript Analyzer)
-    B --> C(Task Orchestrator)
-    C --> D(Validation Agent)
-    D -- "Low Confidence" --> E[Self-Correction]
-    E --> C
-    D -- "High Confidence" --> F[(DB Store)]
+- [Problem Statement](#problem-statement)
+- [Solution Overview](#solution-overview)
+- [Core Features](#core-features)
+- [System Architecture](#system-architecture)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Installation Guide](#installation-guide)
+- [AI Validation Pipeline](#ai-validation-pipeline)
+- [Performance Optimization](#performance-optimization)
+- [Roadmap](#roadmap)
+
+---
+
+## Problem Statement
+
+Agile teams bleed productivity during status updates. Meetings result in massive, unorganized transcripts, ambiguous action items, and lost accountability. Managers spend hours manually tracking whether assigned tasks match the code actually merged in GitHub Pull Requests. 
+
+---
+
+## Solution Overview
+
+**WorkSyncAI** is an end-to-end orchestration platform for high-velocity engineering teams. It bridges the gap between *what is discussed* and *what is built*.
+
+It listens to meetings, extracts precise action items, assigns them, tracks them in a Kanban board, and then **autonomously evaluates GitHub Pull Requests** to ensure the code actually fulfills the meeting's requirements.
+
+---
+
+## Core Features
+
+### 🎙️ Live AI Transcription & Extraction
+- **What it does**: Real-time speech-to-text during meetings, automatically summarizing and extracting Action Items.
+- **Why it matters**: Zero manual note-taking.
+- **Technical implementation**: Standard Web Speech APIs piped into an LLM for semantic extraction.
+
+### 🤖 Ambiguity Detection
+- **What it does**: The AI pauses and asks for clarification if a task owner or deadline is missing.
+- **Why it matters**: Prevents "floating" tasks that no one takes responsibility for.
+
+### 💻 Automated PR Evaluation
+- **What it does**: When a developer opens a PR, WorkSyncAI reads the diff and compares it against the original task generated from the meeting.
+- **Why it matters**: Automates Code Review and ensures feature completeness.
+- **Technical implementation**: GitHub Webhooks linked to a specialized code-evaluator LLM agent.
+
+### 📊 Manager Dashboard & Proactive Nudges
+- **What it does**: Visualizes team velocity and automatically sends follow-ups for at-risk SLAs.
+- **Why it matters**: Keeps sprints on track without micromanagement.
+
+---
+
+## System Architecture
+
+<div align="center">
+  <img src="https://via.placeholder.com/800x400/020617/38bdf8?text=Data+Flow+Architecture" alt="Architecture Diagram">
+</div>
+
+### Data Flow
+1. **Ingestion**: Audio captured on frontend -> Transcribed -> LLM extracts Tasks.
+2. **Storage**: Tasks stored in PostgreSQL via Prisma.
+3. **Action**: Developer pushes code -> GitHub Webhook triggers Next.js API.
+4. **Validation**: AI evaluates PR Diff vs. Database Task constraints.
+5. **Feedback**: AI comments directly on the GitHub PR.
+
+---
+
+## Tech Stack
+
+| Category | Technology | Purpose |
+|----------|------------|---------|
+| **Frontend** | Next.js 16 (App Router), Tailwind | Responsive, server-rendered UI |
+| **Backend** | Next.js Server Actions | API logic and Webhooks |
+| **Database** | PostgreSQL, Prisma ORM | Relational data integrity |
+| **Authentication** | Clerk | Enterprise-grade auth |
+| **AI/LLM** | OpenAI API | Extraction and Code Evaluation |
+
+---
+
+## Project Structure
+
+```bash
+WorkSync/
+ ┣ prisma/         # Database schema and migrations
+ ┣ src/
+ ┃ ┣ app/          # App Router pages
+ ┃ ┣ components/   # UI blocks
+ ┃ ┣ lib/          # Utilities and Prisma client
+ ┃ ┗ proxy.ts      # Edge middleware configurations
 ```
 
-> [!NOTE]
-> For a deep-dive into our **Agent Roles**, **Impact Model**, and **Technical Decision Logs**, please see our [Submission Summary](/submission_summary.md).
+---
 
-## 📦 Getting Started
+## Installation Guide
 
-### 1. Clone the repository
+### 1. Prerequisites
+- Node.js (v18+)
+- PostgreSQL Database
+- Clerk Account
+
+### 2. Clone & Install
 ```bash
-git clone https://github.com/divysaxena24/WorkSync.git
+git clone https://github.com/your-org/WorkSync.git
 cd WorkSync
-```
-
-### 2. Install dependencies
-```bash
 npm install
 ```
 
-### 3. Environment Setup
-Create a `.env.local` file in the root directory and add your keys:
-```env
-# Database
-DATABASE_URL="your-postgresql-url"
-
-# Clerk Auth
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="your-clerk-pub-key"
-CLERK_SECRET_KEY="your-clerk-secret-key"
-NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
-NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
-NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL=/dashboard
-NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL=/dashboard
-
-# AI & External APIs
-GROQ_API_KEY="your-groq-key"
-GITHUB_TOKEN="your-github-personal-access-token"
-
-# LiveKit (Video)
-LIVEKIT_API_KEY="your-livekit-api-key"
-LIVEKIT_API_SECRET="your-livekit-secret"
-NEXT_PUBLIC_LIVEKIT_URL="your-livekit-ws-url"
-
-# Resend (Email Notifications)
-RESEND_API_KEY="your-resend-api-key"
-
-# Vercel Cron
-CRON_SECRET="your-cron-secret-string"
-```
-
-### 4. Database Initialization
+### 3. Setup Database & Env
+Set up `.env` with `DATABASE_URL` and `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`.
 ```bash
 npx prisma generate
 npx prisma db push
 ```
 
-### 5. Run Development Server
+### 4. Run Development Server
 ```bash
 npm run dev
 ```
-Navigate to `http://localhost:3000` to see the results.
 
-## 🧪 Development Workflow
+---
 
-1.  **Sync**: Users log in and join/create a company.
-2.  **Meeting**: Start a meeting, record audio.
-3.  **Meeting to Action**: The AI extracts tasks, automatically assigns owners, flags ambiguities without guessing, creates tasks in the system, and emails a summary to everyone.
-4.  **Execute & Nudge**: Teams execute work. Meanwhile, AI cron jobs proactively track velocity and send follow-ups.
-5.  **Evaluate**: Submit GitHub PR numbers to get instant feedback and score updates on the dashboard.
+## AI Validation Pipeline (Crucial)
 
-## 📄 License
-Precision built for high-performance teams. Under MIT License. © 2026 WorkSyncAI.
+WorkSyncAI's most innovative feature is its **Code Validation Agent**.
+When a PR is submitted, the pipeline:
+1. **Fetches Context**: Retrieves the specific task ticket, including the transcript context from the original meeting.
+2. **Diff Analysis**: Pulls the `git diff` from the PR.
+3. **Chain of Thought**: The LLM evaluates: *Did the developer implement X? Did they handle Y edge case discussed in the meeting?*
+4. **Outcome**: The AI approves the PR or requests changes, directly injecting context from the meeting into the PR comments.
+
+---
+
+## Performance Optimization
+
+- **Edge Middleware**: Authentication state is checked at the edge using Clerk, ensuring instant redirects for unauthenticated users.
+- **Optimistic UI**: Task state updates (e.g., moving a Kanban card) are immediate on the client side while the server syncs in the background.
+
+---
+
+## Roadmap
+
+- [x] Live Transcription & Extraction
+- [x] Basic GitHub PR Evaluation
+- [ ] Slack/Microsoft Teams Bot Integration
+- [ ] Advanced Developer Velocity Metrics
+
+---
+
+## License
+
+This project is licensed under the MIT License.
+
+---
+<div align="center">
+<i>Zero-friction execution loops for elite teams.</i>
+</div>
